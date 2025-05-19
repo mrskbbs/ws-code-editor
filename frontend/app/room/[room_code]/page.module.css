@@ -1,0 +1,16 @@
+.main_layout {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template:
+        "header header"
+        "code code"
+        "stdin stdout";
+    grid-template-rows: 10% 70% 20%;
+}
+.main_layout > header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 1em;
+}
