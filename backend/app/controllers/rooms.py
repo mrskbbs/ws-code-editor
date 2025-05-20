@@ -53,4 +53,9 @@ class RoomController():
         emit("stdin", diffs, broadcast=True, to=self.room.room_code)
 
     def run(self):
-        pass
+        stdout, stderr = self.room.run()
+        
+        if len(stdout) > 0:
+            emit("stdout", stdout)
+        if len(stderr) > 0:
+            emit("stderr", stderr)
