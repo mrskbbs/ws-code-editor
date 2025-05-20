@@ -26,7 +26,18 @@ class RoomController():
     
     def connect(self):
         join_room(room=self.room.room_code, sid=self.user.sid)
+        
         self.room.connections.add(self.user)
+
+        emit("code", self.room.code, to=self.user.sid)
+        emit("stdin", self.room.stdin, to=self.user.sid)
+        emit("stdout", self.room.stdout, to=self.user.sid)
+        emit(
+            "connections", 
+            list(map(str, self.room.connections)), 
+            broadcast=True, 
+            to=self.room.room_code
+        )
 
     def disconnect(self):
         self.room.connections.remove(self.user)
@@ -37,9 +48,7 @@ class RoomController():
             leave_room(room=self.room.room_code, sid=self.user.sid)
             emit(
                 "connections", 
-                list(
-                    map(str, self.room.connections)
-                ), 
+                list(map(str, self.room.connections)), 
                 broadcast=True, 
                 to=self.room.room_code
             )
@@ -53,7 +62,9 @@ class RoomController():
         emit("stdin", diffs, broadcast=True, to=self.room.room_code)
 
     def run(self):
+        emit("run", True, broadcast=True, to=self.room.room_code)
         stdout, stderr = self.room.run()
+        emit("run", False, broadcast=True, to=self.room.room_code)
         
         if len(stdout) > 0:
             emit("stdout", stdout)

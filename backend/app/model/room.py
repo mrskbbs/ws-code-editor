@@ -39,8 +39,6 @@ class RoomModel():
         self.stdin = self.__diffsHandler__(self.stdin, diffs)
 
     def run(self) -> tuple[list[str], list[str]]:
-        self.is_running = True
-
         # Dumb code bellow, might work better
 
         # output = docker_client.containers.run(
@@ -75,8 +73,6 @@ class RoomModel():
         # KILL
         container.stop()
         container.remove()
-
-        self.is_running = False
 
         return self.stdout, self.stderr
 
