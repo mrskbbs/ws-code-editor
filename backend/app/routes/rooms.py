@@ -1,13 +1,25 @@
+from flask import request
 from flask_socketio import Namespace
+from app.controllers.rooms import RoomController
+from app.model.room import RoomModel
 
 class RoomWS(Namespace):
-    def on_connect():
-        pass
-    def on_disconnect():
-        pass
-    def on_code():
-        pass
-    def on_stdin():
-        pass
-    def on_run():
-        pass
+    rooms: dict[str, RoomModel] = dict()
+
+    def __init__(self, namespace = None):
+        super().__init__(namespace)
+
+    def on_connect(self):
+        RoomController(request, self.rooms).connect()
+
+    def on_disconnect(self):
+        RoomController(request, self.rooms).disconnect()
+
+    def on_code(self, data: dict[int, str | None]):
+        RoomController(request, self.rooms).setCode(data)
+
+    def on_stdin(self, data: dict[int, str | None]):
+        RoomController(request, self.rooms).setStdin(data)
+
+    def on_run(self):
+        RoomController(request, self.rooms).run()

@@ -1,6 +1,5 @@
-from flask import Blueprint, make_response, request
+from flask import Blueprint, request
 from app.controllers.auth import AuthController
-from app.utils import createUserToken
 
 
 router = Blueprint("auth", __name__, url_prefix="/auth")
