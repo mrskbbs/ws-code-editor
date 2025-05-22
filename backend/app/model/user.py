@@ -2,9 +2,6 @@ from flask import Request
 
 
 class UserModel():
-    sid: str
-    user_token: str
-
     def __init__(self, request: Request):
         if request.sid == None:
             raise ValueError("SID is NULL")
@@ -16,7 +13,7 @@ class UserModel():
         self.user_token = request.cookies.get("auth")
 
     def __str__(self):
-        return self.user_token
+        return self.user_token+"__@__"+self.sid
     
     def __repr__(self):
         return f"TOKEN[{self.user_token}]@SID[{self.sid}]"
@@ -25,7 +22,7 @@ class UserModel():
         if not isinstance(other, UserModel):
             return False
         
-        return self.sid == other.sid and self.user_token == other.user_token
+        return self.user_token == other.user_token and self.sid == other.sid
 
     def __hash__(self):
         return hash(self.user_token + self.sid)

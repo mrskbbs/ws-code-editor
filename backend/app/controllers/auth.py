@@ -15,7 +15,7 @@ class AuthController():
             response.status = 201
 
             token = createUserToken(self.request)
-            response.set_cookie("auth", token)
+            response.set_cookie("auth", token, max_age=None)
 
             return response
 

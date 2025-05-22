@@ -9,12 +9,18 @@ app = Flask(__name__, instance_relative_config=True)
 app.config.from_mapping(
     SECRET_KEY='secret',
 )
-CORS(app, resource={r"/*": "http://localhost:3000"})
+# TODO: improve resources security
+CORS(app, resource=r"/*", supports_credentials=True)
 app.register_blueprint(auth_router)
 
 # Flask SocketIO config
-socketio = SocketIO(app)
-socketio.init_app(app, cors_allowed_origins="http://localhost:3000")
+socketio = SocketIO(
+    app, 
+    cors_allowed_origins="http://localhost:3000", 
+    cors_credentials=True,
+    logger=True # TODO: maybe write your own logger
+)
+socketio.init_app(app)
 socketio.on_namespace(RoomWS("/room"))
 
 if __name__ == '__main__':
@@ -23,6 +29,5 @@ if __name__ == '__main__':
         5000,
         debug=True
     )
-
     socketio.run(app)
     
