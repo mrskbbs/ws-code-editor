@@ -6,6 +6,7 @@ import styles from "./page.module.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { useWS } from "@/hooks/useWS";
+import { diffApply } from "@/utils";
 
 export default function RoomPage() {
     const router = useRouter();
@@ -27,8 +28,16 @@ export default function RoomPage() {
             console.log("Conns", data);
         });
         socket.current?.on("run", (data) => {
-            console.log("run", data);
             setIsRunning(() => data);
+        });
+        socket.current?.on("code", (diffs) => {
+            setCode((prev) => diffApply(prev, diffs));
+        });
+        socket.current?.on("stdin", (diffs) => {
+            setStdin((prev) => diffApply(prev, diffs));
+        });
+        socket.current?.on("stdout", (data) => {
+            setStdout(() => data);
         });
         socket.current?.on("stderr", (data) => {
             console.error(data);

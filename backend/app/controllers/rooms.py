@@ -37,7 +37,7 @@ class RoomController():
         self.room.connections.add(self.user)
         emit("code", self.__formatListToJson__(self.room.code), to=self.user.sid)
         emit("stdin", self.__formatListToJson__(self.room.stdin), to=self.user.sid)
-        emit("stdout", self.__formatListToJson__(self.room.stdout), to=self.user.sid)
+        emit("stdout", self.room.stdout, to=self.user.sid)
         emit(
             "connections", 
             list(map(str, self.room.connections)), 
@@ -75,10 +75,11 @@ class RoomController():
             stdout, stderr = self.room.run()
             emit("run", False, to=self.room.room_code)
 
-            if len(stdout) > 0:
-                emit("stdout", stdout, to=self.room.room_code)
-            if len(stderr) > 0:
+            emit("stdout", stdout, to=self.room.room_code)
+            
+            if stderr != [""]:
                 emit("stderr", stderr, to=self.room.room_code)
+        
         except Exception as e:
             print(e)
             emit("run", False, to=self.room.room_code)

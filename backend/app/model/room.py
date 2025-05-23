@@ -3,7 +3,7 @@ from app.config import CONTAINER_NAME, SALT
 from app.model.user import UserModel
 from app.docker import docker_client
 from datetime import datetime
-
+from base64 import b64encode
 class RoomModel():
 
     def __init__(self, room_code: str):
@@ -46,67 +46,37 @@ class RoomModel():
         self.stdin = self.__diffsHandler__(self.stdin, diffs)
 
     def run(self) -> tuple[list[str], list[str]]:
-        # try:
-        #     # Dumb code bellow, might work better
-
-        #     # output = docker_client.containers.run(
-        #     #     "python:latest",
-        #     #     command=f"echo {"\n".join(self.stdin)} | python -c {";".join(self.code)}",
-        #     #     auto_remove=True,
-        #     #     detach=False,
-        #     # ).decode()
-
-            
-        #     # More tricky code, might be broken
-
-        #     container = docker_client.containers.create(
-        #         "python:latest",
-        #         detach=False, # we will wait for the execution rather than do it in background
-        #         privileged=False,
-        #     )
-        #     container.start()
-        #     joined_stdin = "\n".join(self.stdin)
-        #     joined_code = ";".join(self.code)
-
-        #     # returns tuple[int, tuple[bytes, bytes]]
-        #     exit_code, output = container.exec_run( 
-        #         cmd=f"echo {joined_stdin} | python -c {joined_code}",
-        #         demux=True,
-        #     )
-        #     print(exit_code, output)
-        #     stdout, stderr = output
-
-        #     self.stdout = stdout.decode() if stdout else ''
-        #     self.stderr = stderr.decode() if stderr else ''
-
-        #     # KILL
-        #     container.stop()
-        #     container.remove()
-
-        # finally:
-        #     container.remove.force()
-
+        self.stdout = [""]
+        self.stderr = [""]
 
         container = docker_client.containers.get(CONTAINER_NAME)
 
-        joined_stdin = "\n".join(self.stdin).strip()
-        joined_code = "\n".join(self.code)
+        encoded_stdin = b64encode("\n".join(self.stdin).encode("utf-8")).decode("utf-8")
+        encoded_code = b64encode("\n".join(self.code).encode("utf-8")).decode("utf-8")
 
         hashed_file_name = sha256(
             datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f").encode() +
             SALT.encode()
         ).hexdigest()
+        
+        commands = [
+            f"echo '{encoded_stdin}' | base64 -d > stdin_{hashed_file_name}", 
+            f"echo '{encoded_code}' | base64 -d > code_{hashed_file_name}.py",  
+            f'python code_{hashed_file_name}.py < stdin_{hashed_file_name}', 
+            f'rm code_{hashed_file_name}.py',
+            f'rm stdin_{hashed_file_name}'
+        ]
 
+        joined_commands = " && ".join(commands)
 
         exit_code, output = container.exec_run( 
-            cmd=f"echo '{joined_stdin}' > 'stdin_{hashed_file_name}' &  echo '{joined_code}' > 'code_{hashed_file_name}.py' & python 'code_{hashed_file_name}.py' < 'stdin_{hashed_file_name}' & rm 'code_{hashed_file_name}.py' & 'stdin_{hashed_file_name}.py'",
+            cmd=f"bash -c '{joined_commands}'",
             demux=True,
         )
 
-        print(exit_code, output)
         stdout, stderr = output
 
-        self.stdout = stdout.decode() if stdout else ''
-        self.stderr = stderr.decode() if stderr else ''
+        self.stdout = stdout.decode().split("\n") if stdout else [""]
+        self.stderr = stderr.decode().split("\n") if stderr else [""]
     
         return self.stdout, self.stderr
