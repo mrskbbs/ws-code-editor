@@ -13,7 +13,7 @@ class UserModel():
         self.user_token = request.cookies.get("auth")
 
     def __str__(self):
-        return self.user_token+"__@__"+self.sid
+        return self.user_token+"@"+self.sid
     
     def __repr__(self):
         return f"TOKEN[{self.user_token}]@SID[{self.sid}]"

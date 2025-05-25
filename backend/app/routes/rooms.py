@@ -11,11 +11,9 @@ class RoomWS(Namespace):
 
     def on_connect(self):
         RoomController(request, self.rooms).connect()
-        print(f"[conn]", self.rooms)
 
     def on_disconnect(self):
         RoomController(request, self.rooms).disconnect()
-        print(self.rooms)
 
     def on_code(self, data: dict[int, str | None]):
         RoomController(request, self.rooms).setCode(data)
