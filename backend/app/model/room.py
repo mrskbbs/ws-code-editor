@@ -21,33 +21,38 @@ class RoomModel():
     # Function to handle code/stdin changes
     def __diffsHandler__(self, arr: list[str], diffs: dict[str, str | None]):
         new_arr = arr.copy()
-        max_ind = max(map(int, diffs.keys()))
-        cut_ind = len(new_arr) + 1
+        max_ind = max(map(int, (x for x in diffs.keys() if diffs[x] != None)))
 
         if (len(new_arr) <= max_ind):
-            new_arr.extend("" for _ in range(len(new_arr)-1, max_ind+1)) 
-
+            new_arr.extend("" for _ in range(len(new_arr)-1, max_ind)) 
+        
+        orig_len = len(new_arr)
+        cut_ind = orig_len + 1
+        
         for key, value in diffs.items():
             line_ind = int(key)
             if(value == None):
                 cut_ind = min(cut_ind, line_ind)
-                continue
             new_arr[line_ind] = value
 
-        if(cut_ind != len(new_arr) + 1):
-            return new_arr[:cut_ind]
+        if(cut_ind != orig_len + 1):
+            cut_ind + 1 < len(new_arr) and new_arr
+            new_arr = new_arr[:cut_ind]
+        
+        if any(x == None for x in new_arr):
+            raise ValueError("None value exists in output array")
 
         return new_arr
     
     def setCode(self, diffs: dict[int, str | None]):
         if type(diffs) is not dict:
-            raise ValueError("Invalid diff input")
+            raise TypeError("Invalid diff input")
         
         self.code = self.__diffsHandler__(self.code, diffs)
 
     def setStdin(self, diffs: dict[int, str | None]): 
         if type(diffs) is not dict:
-            raise ValueError("Invalid diff input")
+            raise TypeError("Invalid diff input")
         
         self.stdin = self.__diffsHandler__(self.stdin, diffs)
 
@@ -95,6 +100,7 @@ class RoomModel():
         self.stdout = (
             stdout
                 .decode()
+                .strip()
                 .replace(hashed_file_name, "")
                 .replace(CONTAINER_WORKDIR, "/workdir/")
                 .split("\n")
@@ -102,6 +108,7 @@ class RoomModel():
         self.stderr = (
             stderr
                 .decode()
+                .strip()
                 .replace(hashed_file_name, "")
                 .replace(CONTAINER_WORKDIR, "")
                 .split("\n")

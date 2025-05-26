@@ -25,6 +25,9 @@ class RoomController():
             self.room = room
     
     def __formatListToJson__(self, arr) -> dict:
+        if type(arr) is not list:
+            raise TypeError("Inappropriate type for __formatListToJson__")
+        
         d = dict()
         
         for i in range(len(arr)):
