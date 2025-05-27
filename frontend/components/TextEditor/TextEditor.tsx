@@ -4,11 +4,13 @@ import { diffApply, diffCreate } from "@/utils";
 import { Dispatch, SetStateAction, useCallback, useEffect } from "react";
 // Input socket + useState ???
 export const TextEditor = ({
+    label,
     name,
     text,
     setText,
     socket,
 }: {
+    label?: string;
     name: string;
     text: string[];
     setText: Dispatch<SetStateAction<string[]>>;
@@ -29,6 +31,7 @@ export const TextEditor = ({
 
     return (
         <div className={styles.container} style={{ gridArea: name }}>
+            {label !== undefined && <h2>{label}</h2>}
             <textarea
                 id={`${name}-text-editor`}
                 name={`${name}-text-editor`}

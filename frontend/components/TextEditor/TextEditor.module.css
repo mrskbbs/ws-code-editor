@@ -1,8 +1,21 @@
 .container {
-    height: 100%;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 .container > textarea {
     width: 100%;
     height: 100%;
+    border: var(--foreground) solid 0.1em;
+    border-radius: 0.5em;
+    padding: 1em;
+    font-family: "SourceCodePro";
+    font-size: 1.05em;
+}
+.container > h2 {
+    padding: 0.25em;
+    margin-bottom: 0.15em;
+    top: -2.75em;
+    left: 0.15em;
+    background-color: var(--background);
 }

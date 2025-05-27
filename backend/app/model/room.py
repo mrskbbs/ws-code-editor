@@ -45,12 +45,18 @@ class RoomModel():
         return new_arr
     
     def setCode(self, diffs: dict[int, str | None]):
+        if self.is_running:
+            return
+        
         if type(diffs) is not dict:
             raise TypeError("Invalid diff input")
         
         self.code = self.__diffsHandler__(self.code, diffs)
 
     def setStdin(self, diffs: dict[int, str | None]): 
+        if self.is_running:
+            return
+        
         if type(diffs) is not dict:
             raise TypeError("Invalid diff input")
         
@@ -60,8 +66,8 @@ class RoomModel():
         self.stderr = text
 
     def run(self) -> tuple[list[str], list[str]]:
-        self.stdout = [""]
-        self.stderr = [""]
+        self.stdout = []
+        self.stderr = []
 
         hashed_file_name = sha256(
             datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f").encode() +
@@ -104,7 +110,7 @@ class RoomModel():
                 .replace(hashed_file_name, "")
                 .replace(CONTAINER_WORKDIR, "/workdir/")
                 .split("\n")
-        ) if stdout else [""]
+        ) if stdout else []
         self.stderr = (
             stderr
                 .decode()
@@ -112,6 +118,6 @@ class RoomModel():
                 .replace(hashed_file_name, "")
                 .replace(CONTAINER_WORKDIR, "")
                 .split("\n")
-        ) if stderr else [""]
+        ) if stderr else []
     
         return self.stdout, self.stderr

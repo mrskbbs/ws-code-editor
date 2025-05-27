@@ -38,7 +38,7 @@ class RoomController():
     def __sendError__(self, text: list[str], exc: Exception):
         logger.error(exc)
         # TODO: Depending on value of production ON/OFF this traceback
-        full_text = text + repr(exc)
+        full_text = text + [repr(exc)]
         self.room.setStderr(full_text)
         emit("stderr", self.room.stderr, to=self.room.room_code)
 

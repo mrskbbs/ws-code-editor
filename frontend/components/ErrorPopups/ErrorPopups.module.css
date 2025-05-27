@@ -1,0 +1,44 @@
+.container {
+    z-index: 2;
+    border: var(--red) solid 0.1em;
+    border-radius: 0.5em;
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+    position: absolute;
+    right: 2.5%;
+    bottom: 5%;
+    color: var(--red);
+    background-color: var(--background);
+    animation-play-state: running;
+    animation-duration: 0.5s;
+    animation-name: reveal;
+}
+.container > p {
+    font-family: "SourceCodePro";
+}
+.container > div {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+.container svg {
+    fill: var(--red);
+}
+.container button {
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.container button:active {
+    scale: 0.9;
+}
+.container > hr {
+    background-color: var(--red);
+}
+@keyframes reveal {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

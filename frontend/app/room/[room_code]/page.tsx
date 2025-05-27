@@ -4,9 +4,16 @@ import { TextEditor } from "@/components/TextEditor/TextEditor";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
 import { useWS } from "@/hooks/useWS";
 import { diffApply } from "@/utils";
+import { createPortal } from "react-dom";
+import { Connections } from "@/components/Connections/Connections";
+import { ErrorPopups } from "@/components/ErrorPopups/ErrorPopups";
+import { TextStatic } from "@/components/TextStatic/TextStatic";
+import LeaveSVG from "../../../public/svg/leave.svg";
+import PlaySVG from "../../../public/svg/play.svg";
+import ClockSVG from "../../../public/svg/clock.svg";
+import CopySVG from "../../../public/svg/copy.svg";
 
 export default function RoomPage() {
     const router = useRouter();
@@ -16,6 +23,8 @@ export default function RoomPage() {
     const [code, setCode] = useState(() => [] as string[]);
     const [stdin, setStdin] = useState(() => [] as string[]);
     const [stdout, setStdout] = useState(() => [] as string[]);
+    const [stderr, setStderr] = useState(() => [] as string[]);
+    const [connections, setConnections] = useState(() => [] as string[]);
     const [is_running, setIsRunning] = useState(() => false);
 
     // Socket IO
@@ -24,8 +33,9 @@ export default function RoomPage() {
     });
 
     useEffect(() => {
+        // Init data
         socket.current?.on("connections", (data) => {
-            console.log("Conns", data);
+            setConnections(() => data);
         });
         socket.current?.on("run", (data) => {
             setIsRunning(() => data);
@@ -40,13 +50,18 @@ export default function RoomPage() {
             setStdout(() => data);
         });
         socket.current?.on("stderr", (data) => {
-            console.error(data);
+            setStderr(() => data);
         });
     }, []);
 
     const runCode = useCallback(() => {
         if (is_running) return;
         socket.current?.emit("run");
+    }, [socket]);
+
+    const leaveRoom = useCallback(() => {
+        socket.current?.disconnect();
+        router.push("/");
     }, [socket]);
 
     if (!is_connected && !is_disconnected) {
@@ -60,33 +75,49 @@ export default function RoomPage() {
     }
 
     return (
-        <main className={styles.main_layout}>
-            <header style={{ gridArea: "header" }}>
-                <h1>Room #{room_code}</h1>
-                <div>
-                    <p>Connections</p> <div></div>
-                </div>
-                <button onClick={() => runCode()}>{is_running ? "Cant run" : "Run"}</button>
-                <span>
-                    <button>Copy invite link</button>
-                    <button>Copy room code</button>
-                </span>
-                <button
-                    onClick={() => {
-                        socket.current?.disconnect();
-                        router.push("/");
-                    }}
-                >
-                    Leave
-                </button>
-            </header>
-            <TextEditor name="code" text={code} setText={setCode} socket={socket.current} />
-            <TextEditor name="stdin" text={stdin} setText={setStdin} socket={socket.current} />
-            <div style={{ gridArea: "stdout" }}>
-                {stdout.map((line) => {
-                    return <p>{line}</p>;
-                })}
-            </div>
-        </main>
+        <>
+            <ErrorPopups text={stderr} />
+            <main className={styles.main_layout}>
+                <header style={{ gridArea: "header" }}>
+                    <div>
+                        <h1>
+                            <span className={styles.sp_weight}>Room</span> {room_code}
+                        </h1>
+                        <button
+                            className={`icon_button ${styles.copy_button}`}
+                            onClick={() => navigator.clipboard.writeText(room_code as string)}
+                        >
+                            <span>Copy room code</span> <CopySVG />
+                        </button>
+                        <Connections connections={connections} />
+                    </div>
+                    <div>
+                        <button
+                            className={`${styles.run_button} ${is_running ? styles.running : ""} icon_button`}
+                            onClick={() => runCode()}
+                        >
+                            {is_running ? (
+                                <>
+                                    <ClockSVG />
+                                    <p>Running...</p>
+                                </>
+                            ) : (
+                                <>
+                                    <PlaySVG />
+                                    <p>Run</p>
+                                </>
+                            )}
+                        </button>
+                        <button className={`icon_button`} onClick={() => leaveRoom()}>
+                            <LeaveSVG />
+                            <p>Leave room</p>
+                        </button>
+                    </div>
+                </header>
+                <TextEditor label="Code editor" name="code" text={code} setText={setCode} socket={socket.current} />
+                <TextEditor label="Input" name="stdin" text={stdin} setText={setStdin} socket={socket.current} />
+                <TextStatic label="Output" style={{ gridArea: "stdout" }} text={stdout} />
+            </main>
+        </>
     );
 }

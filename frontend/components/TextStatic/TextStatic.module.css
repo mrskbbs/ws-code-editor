@@ -1,0 +1,35 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+.container > h2 {
+    padding: 0.25em;
+    margin-bottom: 0.15em;
+    top: -2.75em;
+    left: 0.15em;
+    background-color: var(--background);
+}
+.evenline {
+    background-color: var(--background);
+}
+.oddline {
+    background-color: color-mix(in srgb, var(--background), white 5%);
+}
+.lines_container {
+    display: flex;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    height: 100%;
+    flex-direction: column;
+    border: var(--foreground) solid 0.1em;
+    border-radius: 0.5em;
+    padding: 1em;
+}
+.lines_container > p {
+    font-family: "SourceCodePro";
+    font-size: 1.05em;
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
+}

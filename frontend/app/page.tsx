@@ -31,17 +31,28 @@ export default function Home() {
                 <hr />
             </h1>
             <p>
-                Bro you can edit code together, it's like... <span className="italic">cool</span>
+                Editor where you can edit your code toghether! This is the first finished iteration of this project
+                (MVP). But I plan on improving it over the summer , because I do have some interesting ideas
             </p>
-            <div className="horizontal">
-                <div className={styles.room_containers}>
+            <div className={styles.room_containers}>
+                <div>
                     <p>Create your own room</p>
-                    <button onClick={onClickCreateButton}>Create</button>
+                    <button className="beauty_button" onClick={onClickCreateButton}>
+                        Create
+                    </button>
                 </div>
-                <div className={styles.room_containers}>
+                <div>
                     <p>Join someone elses room</p>
-                    <input ref={input_ref} id="room_code" name="room_code" type="text" />
-                    <button onClick={onClickJoinButton}>Join</button>
+                    <input
+                        ref={input_ref}
+                        id="room_code"
+                        name="room_code"
+                        type="text"
+                        placeholder={"Enter room code"}
+                    />
+                    <button className="beauty_button" onClick={onClickJoinButton}>
+                        Join
+                    </button>
                 </div>
             </div>
         </div>

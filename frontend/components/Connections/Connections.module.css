@@ -1,0 +1,66 @@
+.container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+.conns {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+    height: 3em;
+    max-width: 20em;
+}
+.user_circle {
+    position: relative;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    height: 2em;
+    background-color: var(--violet);
+}
+.user_circle > p {
+    pointer-events: none;
+    opacity: 0;
+    z-index: 2;
+    user-select: none;
+    font-size: 0.75em;
+    position: absolute;
+    bottom: -100%;
+    padding: 1em;
+    color: var(--foreground);
+    background-color: var(--background);
+    border: solid var(--violet) 0.1em;
+    border-radius: 0.5em;
+    transition: 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+.user_circle:hover > p {
+    opacity: 1;
+}
+.hidden_users {
+    position: absolute;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    background-color: var(--background);
+    border: solid var(--violet) 0.1em;
+    border-radius: 0.5em;
+    top: 100%;
+    padding: 0.75em;
+}
+.hidden_users > .user_circle {
+    margin: 0.25em;
+}
+.show_btn {
+    color: var(--foreground);
+    border: solid 0.1em rgba(0, 0, 0, 0);
+    padding: 0.5em;
+    border-radius: 0.25em;
+    transition: 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+.show_btn:hover {
+    border-color: var(--violet);
+}
+.show_btn:active {
+    background-color: var(--violet);
+    color: var(--background);
+}

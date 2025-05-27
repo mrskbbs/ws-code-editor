@@ -1,16 +1,51 @@
 .main_layout {
+    position: relative;
     height: 100%;
-    width: 100%;
+    /* width: 100%; */
     display: grid;
     grid-template:
         "header header"
         "code code"
         "stdin stdout";
-    grid-template-rows: 10% 70% 20%;
+    grid-template-rows: 6.5em auto 15em;
+    grid-template-columns: 50%;
+    margin-left: 2.5em;
+    margin-right: 2.5em;
+    margin-bottom: 2.5em;
+    column-gap: 2em;
 }
 .main_layout > header {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    align-items: center;
+    justify-content: space-between;
     gap: 1em;
+}
+.main_layout > header > div {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+}
+.main_layout > header > div > button {
+    height: 100%;
+}
+.run_button {
+    width: 8em;
+}
+.copy_button {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+}
+.running {
+    color: var(--background) !important;
+    background-color: var(--violet) !important;
+}
+.running > svg {
+    fill: var(--background) !important;
+}
+.sp_weight {
+    font-weight: 400;
 }
