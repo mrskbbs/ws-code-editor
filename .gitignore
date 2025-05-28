@@ -2,3 +2,5 @@
 **/.next
 **/__pycache__
 **/venv
+**/.env
+**/*.log

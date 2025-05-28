@@ -97,7 +97,11 @@ button {
     border: none;
     border-radius: none;
 }
+button:active {
+    scale: 0.9;
+}
 .beauty_button {
+    scale: 1 !important;
     transform-style: preserve-3d;
     position: relative;
     font-family: "Montserrat";
@@ -144,6 +148,7 @@ button {
     display: block;
 }
 .beauty_button:active {
+    scale: 1 !important;
     transform: scaleX(97.5%) scaleY(90%);
 }
 .beauty_button:active::after {
@@ -207,4 +212,7 @@ a {
 }
 a:visited {
     color: var(--violet);
+}
+.error {
+    color: var(--red);
 }

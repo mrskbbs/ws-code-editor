@@ -26,12 +26,6 @@ export const Connections = ({ connections }: { connections: string[] }) => {
                                 <span key={conn} className={styles.user_circle}>
                                     <p>{conn}</p>
                                 </span>
-                                <span key={`${conn}1`} className={styles.user_circle}>
-                                    <p>{conn}</p>
-                                </span>
-                                <span key={`${conn}2`} className={styles.user_circle}>
-                                    <p>{conn}</p>
-                                </span>
                             </>
                         ))}
                     </div>

@@ -68,14 +68,16 @@ class RoomController():
             self.rooms.pop(self.room.room_code, None)
 
     def setCode(self, diffs: dict[int, str | None]):
-        try:
-            self.room.setCode(diffs)
-            emit("code", diffs, to=self.room.room_code, include_self=False)
-            logger.debug(f"[CODE]@[{self.room.room_code}] {repr(self.room.code)}")
-        except Exception as exc:
-            self.__sendError__(["Error occured while trying to change the code:"], exc)
+        logger.debug(f"[DIFFS][CODE]@[{self.room.room_code}] {repr(diffs)}")
+        # try:
+        self.room.setCode(diffs)
+        emit("code", diffs, to=self.room.room_code, include_self=False)
+        logger.debug(f"[CODE]@[{self.room.room_code}] {repr(self.room.code)}")
+        # except Exception as exc:
+            # self.__sendError__(["Error occured while trying to change the code:"], exc)
 
     def setStdin(self, diffs: dict[int, str | None]):
+        logger.debug(f"[DIFFS][STDIN]@[{self.room.room_code}] {repr(diffs)}")
         try:
             self.room.setStdin(diffs)
             emit("stdin", diffs, to=self.room.room_code, include_self=False)

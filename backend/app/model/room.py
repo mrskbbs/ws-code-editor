@@ -21,27 +21,30 @@ class RoomModel():
     # Function to handle code/stdin changes
     def __diffsHandler__(self, arr: list[str], diffs: dict[str, str | None]):
         new_arr = arr.copy()
-        max_ind = max(map(int, (x for x in diffs.keys() if diffs[x] != None)))
+        for key in diffs:
+            ind = int(key)
 
-        if (len(new_arr) <= max_ind):
-            new_arr.extend("" for _ in range(len(new_arr)-1, max_ind)) 
+            if diffs[key] == None and ind >= len(new_arr):
+                raise ValueError("NULL  values must be in range of the current list length")
+            
+            if ind >= len(new_arr):
+                new_arr.extend("" for _ in range(len(new_arr)-1, ind))
+            new_arr[ind] = diffs[key]
         
-        orig_len = len(new_arr)
-        cut_ind = orig_len + 1
-        
-        for key, value in diffs.items():
-            line_ind = int(key)
-            if(value == None):
-                cut_ind = min(cut_ind, line_ind)
-            new_arr[line_ind] = value
+        cut_ind = len(new_arr) + 1
 
-        if(cut_ind != orig_len + 1):
-            cut_ind + 1 < len(new_arr) and new_arr
+        for i in range(len(new_arr)-1):
+            if new_arr[i] == None and new_arr[i+1] != None:
+                raise ValueError("NULL values must be followed by another NULL value or end of the list")
+            
+            if new_arr[i] == None:
+                cut_ind = min(cut_ind, i)
+            if new_arr[i+1] == None:
+                cut_ind = min(cut_ind, i+1)
+
+        if cut_ind != len(new_arr) + 1:
             new_arr = new_arr[:cut_ind]
         
-        if any(x == None for x in new_arr):
-            raise ValueError("None value exists in output array")
-
         return new_arr
     
     def setCode(self, diffs: dict[int, str | None]):

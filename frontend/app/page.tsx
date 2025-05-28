@@ -1,18 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { RefObject, useCallback, useRef } from "react";
+import React, { RefObject, useCallback, useRef, useState } from "react";
 import styles from "./page.module.css";
 
 export default function Home() {
     const router = useRouter();
 
     const input_ref = useRef<null | HTMLInputElement>(null);
-
+    const [error, setError] = useState(() => null as string | null);
     const onClickJoinButton = useCallback(() => {
         if (input_ref.current === undefined || input_ref.current === null || input_ref.current.value.length === 0) {
-            // TODO: handle error
-            console.error("Input field is empty");
+            setError(() => "Room code field can't be empty");
             return;
         }
 
@@ -50,6 +49,7 @@ export default function Home() {
                         type="text"
                         placeholder={"Enter room code"}
                     />
+                    {error !== null && <p className="error">{error}</p>}
                     <button className="beauty_button" onClick={onClickJoinButton}>
                         Join
                     </button>

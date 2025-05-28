@@ -14,6 +14,7 @@ import LeaveSVG from "../../../public/svg/leave.svg";
 import PlaySVG from "../../../public/svg/play.svg";
 import ClockSVG from "../../../public/svg/clock.svg";
 import CopySVG from "../../../public/svg/copy.svg";
+import { ConnectingSpinner } from "@/components/ConnectingSpinner/ConnectingSpinner";
 
 export default function RoomPage() {
     const router = useRouter();
@@ -65,10 +66,17 @@ export default function RoomPage() {
     }, [socket]);
 
     if (!is_connected && !is_disconnected) {
-        return <p>Connecting...</p>;
+        return <ConnectingSpinner />;
     }
     if (is_disconnected) {
-        return <a href="https://www.youtube.com/watch?v=IEDWEhXXfoQ">DISCONNECTED</a>;
+        return (
+            <div className={styles.dicsonnect_container}>
+                <h1>You've been disconnected</h1>
+                <button className="beauty_button" onClick={() => router.push("/")}>
+                    Return to main page
+                </button>
+            </div>
+        );
     }
     if (socket.current === null) {
         return <p>Socket is null smh</p>;

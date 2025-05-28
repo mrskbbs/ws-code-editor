@@ -1,5 +1,5 @@
-export function diffCreate(prev: string[], next: string[]): { [key: number]: string | null } {
-    const diffs = new Map<Number, string | null>();
+export function diffCreate(prev: string[], next: string[]): Map<number, string | null> {
+    const diffs = new Map<number, string | null>();
     let min_len = prev.length > next.length ? next.length : prev.length;
     for (let i = 0; i < min_len; i++) {
         if (prev[i] !== next[i]) diffs.set(i, next[i]);
@@ -12,7 +12,7 @@ export function diffCreate(prev: string[], next: string[]): { [key: number]: str
         for (let i = min_len; i < next.length; i++) diffs.set(i, next[i]);
     }
 
-    return Object.fromEntries(diffs.entries());
+    return diffs;
 }
 
 export function diffApply(arr: string[], diffs: { [key: number]: string | null }) {

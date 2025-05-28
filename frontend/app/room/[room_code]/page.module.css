@@ -21,6 +21,11 @@
     justify-content: space-between;
     gap: 1em;
 }
+.main_layout > head > h1 {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 2.5em !important;
+}
 .main_layout > header > div {
     position: relative;
     display: flex;
@@ -48,4 +53,13 @@
 }
 .sp_weight {
     font-weight: 400;
+}
+.dicsonnect_container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    justify-content: center;
+    align-items: center;
 }

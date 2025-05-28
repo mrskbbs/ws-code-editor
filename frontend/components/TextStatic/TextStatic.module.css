@@ -4,6 +4,11 @@
     position: relative;
     overflow: hidden;
 }
+.container > span {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+}
 .container > h2 {
     padding: 0.25em;
     margin-bottom: 0.15em;
