@@ -1,3 +1,6 @@
+export function jsonKey(params: any) {
+    return JSON.stringify(params);
+}
 export function diffCreate(prev: string[], next: string[]): Map<number, string | null> {
     const diffs = new Map<number, string | null>();
     let min_len = prev.length > next.length ? next.length : prev.length;

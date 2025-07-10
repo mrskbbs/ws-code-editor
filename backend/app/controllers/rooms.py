@@ -69,12 +69,12 @@ class RoomController():
 
     def setCode(self, diffs: dict[int, str | None]):
         logger.debug(f"[DIFFS][CODE]@[{self.room.room_code}] {repr(diffs)}")
-        # try:
-        self.room.setCode(diffs)
-        emit("code", diffs, to=self.room.room_code, include_self=False)
-        logger.debug(f"[CODE]@[{self.room.room_code}] {repr(self.room.code)}")
-        # except Exception as exc:
-            # self.__sendError__(["Error occured while trying to change the code:"], exc)
+        try:
+            self.room.setCode(diffs)
+            emit("code", diffs, to=self.room.room_code, include_self=False)
+            logger.debug(f"[CODE]@[{self.room.room_code}] {repr(self.room.code)}")
+        except Exception as exc:
+            self.__sendError__(["Error occured while trying to change the code:"], exc)
 
     def setStdin(self, diffs: dict[int, str | None]):
         logger.debug(f"[DIFFS][STDIN]@[{self.room.room_code}] {repr(diffs)}")
@@ -84,6 +84,34 @@ class RoomController():
             logger.debug(f"[STDIN]@[{self.room.room_code}] {repr(self.room.stdin)}")
         except Exception as exc:
             self.__sendError__(["Error occured while trying to change the stdin:"], exc)
+    
+    def locationCode(self, location: list[int]):
+        logger.debug(f"self.user, {location}")
+        try:
+            if len(location) > 0: 
+                self.room.code_location[self.user] = location
+            else: 
+                self.room.code_location.pop(self.user, None)
+            emit("code_location", {
+                "location": location,
+                "user": str(self.user),
+            }, to=self.room.room_code, include_self=False)
+        except Exception as exc:
+            self.__sendError__(["Error occured while trying to change code location:"], exc)
+
+    def locationStdin(self, location: list[int]):
+        logger.debug(f"self.user, {location}")
+        try:
+            if len(location) > 0: 
+                self.room.stdin_location[self.user] = location
+            else: 
+                self.room.stdin_location.pop(self.user, None)
+            emit("stdin_location", {
+                "location": location,
+                "user": str(self.user),
+            }, to=self.room.room_code, include_self=False)
+        except Exception as exc:
+            self.__sendError__(["Error occured while trying to change stdin location:"], exc)
 
     def run(self):
         try:

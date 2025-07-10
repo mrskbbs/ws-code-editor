@@ -21,8 +21,8 @@ export default function RoomPage() {
     const { room_code } = useParams();
 
     // Main app data
-    const [code, setCode] = useState(() => [] as string[]);
-    const [stdin, setStdin] = useState(() => [] as string[]);
+    const [code, setCode] = useState(() => [""] as string[]);
+    const [stdin, setStdin] = useState(() => [""] as string[]);
     const [stdout, setStdout] = useState(() => [] as string[]);
     const [stderr, setStderr] = useState(() => [] as string[]);
     const [connections, setConnections] = useState(() => [] as string[]);

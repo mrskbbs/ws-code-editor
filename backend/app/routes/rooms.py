@@ -21,5 +21,11 @@ class RoomWS(Namespace):
     def on_stdin(self, data: dict[int, str | None]):
         RoomController(request, self.rooms).setStdin(data)
 
+    def on_code_location(self, data: list[int]):
+        RoomController(request, self.rooms).locationCode(data)
+
+    def on_stdin_location(self, data: list[int]):
+        RoomController(request, self.rooms).locationStdin(data)
+
     def on_run(self):
         RoomController(request, self.rooms).run()

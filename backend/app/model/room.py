@@ -15,6 +15,8 @@ class RoomModel():
         self.stdin: list[str] = list()
         self.stdout: list[str] = list()
         self.stderr: list[str] = list()
+        self.code_location: dict[str, list[int]] = dict()
+        self.stdin_location: dict[str, list[int]] = dict()
         self.connections: set[UserModel] = set()
         self.is_running: bool = False
 
