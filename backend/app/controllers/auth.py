@@ -8,19 +8,31 @@ class AuthController():
     def __init__(self, request: Request):
         self.request = request
     
-    def getUserToken(self) -> Response:
-        # Create a token
-        if self.request.cookies.get("auth") == None:
-            response = make_response()
-            response.status = 201
+    def signup():
+        pass
+    
+    def login():
+        pass
 
-            token = createUserToken(self.request)
-            response.set_cookie("auth", token, max_age=None)
+    def logout():
+        pass
 
-            return response
+    def verifyToken():
+        pass
 
-        # User already has a token
-        response = make_response()
-        response.status = 200
+    # def getUserToken(self) -> Response:
+    #     # Create a token
+    #     if self.request.cookies.get("auth") == None:
+    #         response = make_response()
+    #         response.status = 201
 
-        return response
+    #         token = createUserToken(self.request)
+    #         response.set_cookie("auth", token, max_age=None)
+
+    #         return response
+
+    #     # User already has a token
+    #     response = make_response()
+    #     response.status = 200
+
+    #     return response

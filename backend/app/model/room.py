@@ -1,9 +1,50 @@
 from hashlib import sha256
 from app.config import CONTAINER_NAME, CONTAINER_USER, CONTAINER_WORKDIR, SALT
+from app.model.base import Base
 from app.model.user import UserModel
 from app.docker import docker_client
 from datetime import datetime
 from base64 import b64encode
+
+from datetime import datetime
+from typing import Optional
+import uuid
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import ForeignKey, func
+
+from app.model.base import Base
+
+class AssociationRoomUser(Base):
+    __tablename__ = "association_room_user"
+
+    user_id_fk: Mapped[UUID] = mapped_column(ForeignKey("user_.id"), ondelete="CASCADE", onupdate="CASCADE")
+    room_id_fk: Mapped[UUID] = mapped_column(ForeignKey("room.id"), ondelete="CASCADE", onupdate="CASCADE")
+
+    room: Mapped["RoomModelNew"] = relationship(back_populates="users")
+    user: Mapped["UserModelNew"] = relationship(back_populates="rooms")
+
+class RoomModelNew(Base):
+    __tablename__ = "room"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), 
+        primary_key=True, 
+        unique=True, 
+        server_default=func.gen_random_uuid()
+    )
+    
+    invite_token: Mapped[str] = mapped_column(unique=True)
+    
+    users: Mapped[list["AssociationRoomUser"]] = relationship(back_populates="room")
+
+    creator_id_fk: Mapped[UUID] = mapped_column(ForeignKey("user_.id", ondelete="CASCADE", onupdate="CASCADE"))
+    creator: Mapped[UUID] = relationship()
+
+    code: Mapped[str]
+    stdin: Mapped[str]
+    
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 class RoomModel():
 
     def __init__(self, room_code: str):

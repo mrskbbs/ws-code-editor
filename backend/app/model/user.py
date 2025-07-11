@@ -1,5 +1,31 @@
 from flask import Request
 
+from datetime import datetime
+from typing import Optional
+import uuid
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import ForeignKey, func
+
+from app.model.base import Base
+
+class UserModelNew(Base):
+    __tablename__ = "user_"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), 
+        primary_key=True, 
+        unique=True, 
+        server_default=func.gen_random_uuid()
+    )
+    username: Mapped[str] = mapped_column(unique=True)
+    email: Mapped[str] = mapped_column(unique=True)
+    password: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    
+    sessions: Mapped[list["SessionModel"]] = relationship(back_populates="user")
+    rooms: Mapped[list["AssociationRoomUser"]] = relationship(back_populates="user")
+
 
 class UserModel():
     def __init__(self, request: Request):

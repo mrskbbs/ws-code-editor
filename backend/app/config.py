@@ -6,6 +6,8 @@ load_dotenv()
 
 SALT = os.getenv("SALT", "default_sault_value")
 
+DB_URL = os.getenv("DB_URL", "postgresql://username:password@localhost:5432/code_editor")
+
 CONTAINER_NAME = os.getenv("CONTAINER_NAME", "container_python")
 CONTAINER_USER = os.getenv("CONTAINER_USER", "container_user")
 CONTAINER_WORKDIR = f"/home/{CONTAINER_USER}/"

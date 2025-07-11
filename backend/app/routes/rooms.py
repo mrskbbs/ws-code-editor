@@ -3,6 +3,28 @@ from flask_socketio import Namespace, emit
 from app.controllers.rooms import RoomController
 from app.model.room import RoomModel
 
+
+from flask import Blueprint, request
+from app.controllers.auth import AuthController
+
+router = Blueprint("rooms", __name__, url_prefix="/rooms")
+
+@router.post("/rooms")
+def createRoom():
+    pass
+
+@router.get("/rooms")
+def getMyRooms():
+    pass
+
+@router.get("/rooms/invite/:invite_token")
+def verifyInviteToken():
+    pass
+
+@router.delete("/rooms/:id")
+def deleteRoom():
+    pass
+
 class RoomWS(Namespace):
     rooms: dict[str, RoomModel] = dict()
 
