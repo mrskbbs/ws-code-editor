@@ -19,10 +19,11 @@ class SessionModel(Base):
 
     # We ONUPDATE SET NULL cause we are preventing a case 
     # where db admin changes the user id and it messes up our tokens
-    user_id_fk: Mapped[UUID] = mapped_column(ForeignKey("user_.id", ondelete="CASCADE", onupdate="SET NULL")) 
+    
+    user_id_fk: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_.id", ondelete="CASCADE", onupdate="SET NULL")) 
     user: Mapped["UserModelNew"] = relationship(back_populates="sessions")
     
-    token: Mapped[str] = mapped_column(unique=True)
+    auth_token: Mapped[str] = mapped_column(unique=True)
     user_agent: Mapped[Optional(str)]
     
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())

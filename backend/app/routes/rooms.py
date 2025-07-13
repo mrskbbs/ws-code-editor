@@ -1,7 +1,7 @@
 from flask import request
 from flask_socketio import Namespace, emit
 from app.controllers.rooms import RoomController
-from app.model.room import RoomModel
+from app.models.room import RoomModel
 
 
 from flask import Blueprint, request

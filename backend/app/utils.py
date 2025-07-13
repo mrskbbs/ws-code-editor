@@ -3,6 +3,8 @@ import logging
 import coloredlogs
 from flask import Request
 from hashlib import sha256
+
+from sqlalchemy import and_
 from app.config import LOG_LEVEL, LOG_PATH, SALT, SAVE_LOGS
 
 if SAVE_LOGS:
@@ -18,3 +20,11 @@ def createUserToken(request: Request) -> str:
         request.remote_addr.encode() + 
         SALT.encode()
     ).hexdigest()
+
+def sha256salt(s: str) -> str:
+    return sha256(
+        (s + SALT).encode()
+    ).hexdigest()
+
+def unwrapForWhereClasue(model, d: dict):
+    return and_(getattr(model, k) == v for k,v in d.items())

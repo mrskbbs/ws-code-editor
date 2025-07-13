@@ -7,7 +7,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import ForeignKey, func
 
-from app.model.base import Base
+from app.models.base import Base
+from app.models.associations import association_user_room
 
 class UserModelNew(Base):
     __tablename__ = "user_"
@@ -24,7 +25,10 @@ class UserModelNew(Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     
     sessions: Mapped[list["SessionModel"]] = relationship(back_populates="user")
-    rooms: Mapped[list["AssociationRoomUser"]] = relationship(back_populates="user")
+    rooms: Mapped[list["RoomModelNew"]] = relationship(
+        secondary=association_user_room,
+        back_populates="user"
+    )
 
 
 class UserModel():

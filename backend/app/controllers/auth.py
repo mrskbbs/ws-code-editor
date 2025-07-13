@@ -1,38 +1,67 @@
 from flask import Request, Response, make_response
-from app.utils import createUserToken
-
+from app.services.auth import AuthService
+from app.utils import createUserToken, logger
 
 class AuthController():
     request: Request
     
     def __init__(self, request: Request):
         self.request = request
+        self.body = request.get_json()
+        self.auth_token = request.cookies.get("auth_token")
     
-    def signup():
-        pass
+
+    def __addTokenCookie__(self, response: Response, token: str):
+        response.set_cookie("auth_token", token) # TODO: SOME SECURITY IN TOKEN SETTINGS
+
+
+    def verifyToken(self):
+        user = AuthService().verifyToken(self.auth_token)
+        return user
+
+
+    def signup(self):
+        response = make_response()
+        try: 
+            if self.auth_token:
+                raise Exception("You need to log out first")
+            
+            token = AuthService().signup(self.body)
+            self.__addTokenCookie__(response, token)
+            response.status = 201
+        except Exception as exc:
+            response.status = 500
+        finally:
+            return response
+
     
-    def login():
-        pass
+    def login(self):
+        response = make_response()
+        try: 
+            if self.auth_token:
+                raise Exception("You need to log out first")
 
-    def logout():
-        pass
+            token = AuthService().login(self.body)
+            self.__addTokenCookie__(response, token)
+            response.status = 201
+        except Exception as exc:
+            response.status = 500
+        finally:
+            return response
 
-    def verifyToken():
-        pass
 
-    # def getUserToken(self) -> Response:
-    #     # Create a token
-    #     if self.request.cookies.get("auth") == None:
-    #         response = make_response()
-    #         response.status = 201
+    def logout(self):
+        response = make_response()
+        try: 
+            if not self.auth_token:
+                raise KeyError("No authentication token provided")
 
-    #         token = createUserToken(self.request)
-    #         response.set_cookie("auth", token, max_age=None)
-
-    #         return response
-
-    #     # User already has a token
-    #     response = make_response()
-    #     response.status = 200
-
-    #     return response
+            AuthService().logout(self.auth_token)
+            self.__addTokenCookie__(response, "")
+            response.status = 200
+        except KeyError as exc:
+            response.status = 400
+        except Exception as exc:
+            response.status = 500
+        finally:
+            return response
