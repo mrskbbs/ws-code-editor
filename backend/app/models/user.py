@@ -6,13 +6,15 @@ import uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import ForeignKey, func
+from sqlalchemy_serializer import SerializerMixin
 
 from app.models.base import Base
 from app.models.associations import association_user_room
 
-class UserModelNew(Base):
+class UserModelNew(Base, SerializerMixin):
     __tablename__ = "user_"
-
+    serialize_rules = ('-rooms.user', '-sessions.user',)
+    
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 
         primary_key=True, 

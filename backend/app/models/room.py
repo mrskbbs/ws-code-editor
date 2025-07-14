@@ -1,4 +1,6 @@
 from hashlib import sha256
+
+from sqlalchemy_serializer import SerializerMixin
 from app.config import CONTAINER_NAME, CONTAINER_USER, CONTAINER_WORKDIR, SALT
 from app.model.base import Base
 from app.model.user import UserModel
@@ -13,11 +15,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import ForeignKey, Table, func
 
-from app.model.base import Base
-from app.model.associations import association_user_room
+from app.models.base import Base
+from app.models.associations import association_user_room
 
-class RoomModelNew(Base):
+class RoomModelNew(Base, SerializerMixin):
     __tablename__ = "room"
+    serialize_rules = ('-users.rooms', '-creator.rooms',)
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 

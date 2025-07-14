@@ -4,11 +4,13 @@ import uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import ForeignKey, func
+from sqlalchemy_serializer import SerializerMixin
 
-from app.model.base import Base
+from app.models.base import Base
 
-class SessionModel(Base):
+class SessionModel(Base, SerializerMixin):
     __tablename__ = "session"
+    serialize_rules = ('-user.sessions',)
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 
