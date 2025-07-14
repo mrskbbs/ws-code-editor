@@ -19,17 +19,19 @@ class AuthService():
         }, JWT_KEY, JWT_ALGO)
         return token
     
+
     @injectDb
-    def verifyToken(self, auth_token: str | None, db: Session):
-        if not auth_token: raise Exception("Invalid authentication token")
+    def verifyToken(self, auth_token: str | None, db: Session) -> UserModelNew:
+        if not auth_token: raise ValueError("Invalid authentication token")
 
         payload: AuthJWTPayload = jwt.decode(auth_token, JWT_KEY, [JWT_ALGO], reqiure=["iat"])
 
-        if not payload["id"]: raise Exception("Invalid token")
+        if not payload["id"]: raise ValueError("Invalid authentication token")
 
         user = db.get_one(UserModelNew, payload["id"])
         return user
-            
+    
+
     @injectDb
     def signup(self, body: AuthSignup, user_agent: str | None, db: Session):
         try:
@@ -54,6 +56,7 @@ class AuthService():
         except Exception as exc:
             db.rollback()
             raise exc
+
 
     @injectDb
     def login(self, body: AuthLogin, user_agent: str | None, db: Session):
@@ -80,6 +83,7 @@ class AuthService():
         except Exception as exc:
             db.rollback()
             raise exc
+
 
     @injectDb
     def logout(self, auth_token: str, db: Session):

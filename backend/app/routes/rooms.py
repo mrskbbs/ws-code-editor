@@ -1,6 +1,7 @@
 from flask import request
 from flask_socketio import Namespace, emit
 from app.controllers.rooms import RoomController
+from app.middleware.auth import authMiddleware
 from app.models.room import RoomModel
 
 
@@ -9,21 +10,27 @@ from app.controllers.auth import AuthController
 
 router = Blueprint("rooms", __name__, url_prefix="/rooms")
 
+@router.before_request
+def middleware():
+    return authMiddleware(request)
+
 @router.post("/rooms")
 def createRoom():
-    pass
+    return RoomController(request).create()
 
 @router.get("/rooms")
 def getMyRooms():
-    pass
+    return RoomController(request).getMy()
 
-@router.get("/rooms/invite/:invite_token")
-def verifyInviteToken():
-    pass
+@router.delete("/rooms/<room_id>")
+def deleteRoom(room_id: str):
+    return RoomController(request).delete(room_id)
 
-@router.delete("/rooms/:id")
-def deleteRoom():
-    pass
+@router.get("/rooms/<room_id>/invite/<invite_token>")
+def acceptInvite(room_id: str, invite_token: str):
+    return RoomController(request).acceptInvite(room_id, invite_token)
+
+
 
 class RoomWS(Namespace):
     rooms: dict[str, RoomModel] = dict()

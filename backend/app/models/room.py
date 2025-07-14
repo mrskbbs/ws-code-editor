@@ -25,7 +25,7 @@ class RoomModelNew(Base):
         unique=True, 
         server_default=func.gen_random_uuid()
     )
-    
+    name: Mapped[str]
     invite_token: Mapped[str] = mapped_column(unique=True)
     
     users: Mapped[list["UserModelNew"]] = relationship(
@@ -36,10 +36,11 @@ class RoomModelNew(Base):
     creator_id_fk: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_.id", ondelete="CASCADE", onupdate="CASCADE"))
     creator: Mapped["UserModelNew"] = relationship()
 
-    code: Mapped[str]
-    stdin: Mapped[str]
+    code: Mapped[str] = mapped_column(default="")
+    stdin: Mapped[str] = mapped_column(default="")
     
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    
 
 
 class RoomModel():

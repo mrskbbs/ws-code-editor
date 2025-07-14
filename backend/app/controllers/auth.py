@@ -26,7 +26,7 @@ class AuthController():
             if self.auth_token:
                 raise Exception("You need to log out first")
             
-            token = AuthService().signup(self.body)
+            token = AuthService().signup(self.body, self.request.user_agent)
             self.__addTokenCookie__(response, token)
             response.status = 201
         except Exception as exc:
@@ -41,7 +41,7 @@ class AuthController():
             if self.auth_token:
                 raise Exception("You need to log out first")
 
-            token = AuthService().login(self.body)
+            token = AuthService().login(self.body, self.request.user_agent)
             self.__addTokenCookie__(response, token)
             response.status = 201
         except Exception as exc:

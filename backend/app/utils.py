@@ -1,7 +1,8 @@
 from datetime import datetime
+from functools import wraps
 import logging
 import coloredlogs
-from flask import Request
+from flask import Request, g
 from hashlib import sha256
 
 from sqlalchemy import and_
@@ -28,3 +29,10 @@ def sha256salt(s: str) -> str:
 
 def unwrapForWhereClasue(model, d: dict):
     return and_(getattr(model, k) == v for k,v in d.items())
+
+def injectUser(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        kwargs["user"] = g.user
+        return f(*args, **kwargs)
+    return wrapper
