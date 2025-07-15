@@ -12,22 +12,14 @@ from app.utils import sha256salt, logger
 class RoomService():
 
     @injectDb
-    def get(self, room_id: str, db: Session) -> RoomModelNew:
-        try:
-            room = db.get_one(RoomModelNew, uuid.UUID(room_id))
-            return room
-        except Exception as exc:
-            logger.error(exc)
-            raise Exception("Failed to get a room")
+    def get(self, room_id: uuid.UUID, db: Session) -> RoomModelNew:
+        room = db.get_one(RoomModelNew, uuid.UUID(room_id))
+        return room
 
 
     @injectDb
     def getMy(self, user: UserModelNew, db: Session) -> list[RoomModelNew]:
-        try:
-            return user.rooms
-        except Exception as exc:
-            logger.error(exc)
-            raise Exception("Failed to get my rooms")
+        return user.rooms
 
 
     @injectDb
@@ -41,14 +33,14 @@ class RoomService():
             db.commit()
 
             return room.id    
+        
         except Exception as exc:
-            logger.error(exc)
             db.rollback()
             raise exc
     
     
     @injectDb
-    def acceptInviteToken(self, room_id: str, invite_token: str, user: UserModelNew, db: Session):
+    def acceptInviteToken(self, room_id: uuid.UUID, invite_token: str, user: UserModelNew, db: Session):
         try:
             room = db.get_one(RoomModelNew, room_id)
     
@@ -57,19 +49,19 @@ class RoomService():
     
             insert(association_room_user).values(user_id_fk=user.id, room_id_fk=room.id)
             db.commit()
+
         except Exception as exc:
-            logger.error(exc)
             db.rollback()
             raise exc
 
 
     @injectDb
-    def delete(self, room_id: str, db: Session):
+    def delete(self, room_id: uuid.UUID, db: Session):
         try:
             delete(RoomModelNew).where(id=room_id)
             db.commit()
+
         except Exception as exc:
-            logger.error(exc)
             db.rollback()
             raise exc
     

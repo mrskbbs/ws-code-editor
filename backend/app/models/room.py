@@ -46,20 +46,30 @@ class RoomModelNew(Base, SerializerMixin):
     
 
 
-class RoomModel():
+class RoomDynamicModel():
+    """
+    This model is used for realtime interactions 
+    and it is created on first websocket connection.
+    
+    My reasoning is that extending SQLAlchemy model 
+    could break some stuff, plus constant sql queries 
+    that change the state of a table will be too much 
+    of a load for db
+    """
+    def __init__(self, room: RoomModelNew):
+        self.room_db = room
 
-    def __init__(self, room_code: str):
-        # Unique id
-        self.room_code = room_code
-
+        self.id = str(self.room_db.id)
+        self.name = self.room_db.name
+        
         # Room props
-        self.code: list[str] = list()
-        self.stdin: list[str] = list()
+        self.code: list[str] = self.room.code.splitlines()
+        self.stdin: list[str] = self.room.stdin.splitlines()
         self.stdout: list[str] = list()
         self.stderr: list[str] = list()
-        self.code_location: dict[str, list[int]] = dict()
-        self.stdin_location: dict[str, list[int]] = dict()
-        self.connections: set[UserModel] = set()
+        self.code_location: dict[uuid.UUID, list[int]] = dict()
+        self.stdin_location: dict[uuid.UUID, list[int]] = dict()
+        self.connections: set["UserModelNew"] = set()
         self.is_running: bool = False
 
     # Function to handle code/stdin changes

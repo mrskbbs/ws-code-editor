@@ -2,7 +2,7 @@ from datetime import datetime
 from functools import wraps
 import logging
 import coloredlogs
-from flask import Request, g
+from flask import Request, session
 from hashlib import sha256
 
 from sqlalchemy import and_
@@ -33,6 +33,6 @@ def unwrapForWhereClasue(model, d: dict):
 def injectUser(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        kwargs["user"] = g.user
+        kwargs["user"] = session["user"]
         return f(*args, **kwargs)
     return wrapper

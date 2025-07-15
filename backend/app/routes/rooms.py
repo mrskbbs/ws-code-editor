@@ -29,32 +29,3 @@ def deleteRoom(room_id: str):
 @router.get("/rooms/<room_id>/invite/<invite_token>")
 def acceptInvite(room_id: str, invite_token: str):
     return RoomController(request).acceptInvite(room_id, invite_token)
-
-
-
-class RoomWS(Namespace):
-    rooms: dict[str, RoomModel] = dict()
-
-    def __init__(self, namespace = None):
-        super().__init__(namespace)
-
-    def on_connect(self):
-        RoomController(request, self.rooms).connect()
-
-    def on_disconnect(self):
-        RoomController(request, self.rooms).disconnect()
-
-    def on_code(self, data: dict[int, str | None]):
-        RoomController(request, self.rooms).setCode(data)
-
-    def on_stdin(self, data: dict[int, str | None]):
-        RoomController(request, self.rooms).setStdin(data)
-
-    def on_code_location(self, data: list[int]):
-        RoomController(request, self.rooms).locationCode(data)
-
-    def on_stdin_location(self, data: list[int]):
-        RoomController(request, self.rooms).locationStdin(data)
-
-    def on_run(self):
-        RoomController(request, self.rooms).run()

@@ -2,7 +2,7 @@ from flask import request
 from app.main import app
 import pytest
 from app.controllers.rooms import RoomController
-from app.model.room import RoomModel
+from app.models.room import RoomModel
 
 # @pytest.fixture
 # def client():
