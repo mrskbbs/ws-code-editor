@@ -3,7 +3,7 @@
 import { TextEditor } from "@/components/TextEditor/TextEditor";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./page.module.css";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useWS } from "@/hooks/useWS";
 import { diffApply } from "@/utils";
 import { createPortal } from "react-dom";
@@ -15,48 +15,48 @@ import PlaySVG from "../../../public/svg/play.svg";
 import ClockSVG from "../../../public/svg/clock.svg";
 import CopySVG from "../../../public/svg/copy.svg";
 import { ConnectingSpinner } from "@/components/ConnectingSpinner/ConnectingSpinner";
+import { RoomContext } from "./layout";
+import { observer } from "mobx-react-lite";
+import { BACKEND_URL, FRONTEND_URL } from "@/config";
 
-export default function RoomPage() {
+function RoomPage() {
     const router = useRouter();
-    const { room_code } = useParams();
-
-    // Main app data
-    const [code, setCode] = useState(() => [""] as string[]);
-    const [stdin, setStdin] = useState(() => [""] as string[]);
-    const [stdout, setStdout] = useState(() => [] as string[]);
-    const [stderr, setStderr] = useState(() => [] as string[]);
-    const [connections, setConnections] = useState(() => [] as string[]);
-    const [is_running, setIsRunning] = useState(() => false);
+    const { room_id } = useParams();
+    const room = useContext(RoomContext);
 
     // Socket IO
-    const { is_connected, is_disconnected, socket } = useWS(`http://localhost:5000/room?room_code=${room_code}`, {
+    const { is_connected, is_disconnected, socket } = useWS(`${BACKEND_URL}/ws/room?room_id=${room_id}`, {
         withCredentials: true,
     });
 
     useEffect(() => {
         // Init data
+        socket.current?.on("init", (data) => {
+            room.name = data.name;
+            room.invite_token = `${FRONTEND_URL}/room/${room_id}/invite/${data.invite_token}`;
+        });
         socket.current?.on("connections", (data) => {
-            setConnections(() => data);
+            room.connections = data;
         });
         socket.current?.on("run", (data) => {
-            setIsRunning(() => data);
+            room.is_running = data;
         });
         socket.current?.on("code", (diffs) => {
-            setCode((prev) => diffApply(prev, diffs));
+            room.code = diffApply(room.code, diffs);
         });
         socket.current?.on("stdin", (diffs) => {
-            setStdin((prev) => diffApply(prev, diffs));
+            room.stdin = diffApply(room.stdin, diffs);
         });
         socket.current?.on("stdout", (data) => {
-            setStdout(() => data);
+            room.stdout = data;
         });
         socket.current?.on("stderr", (data) => {
-            setStderr(() => data);
+            room.stderr = data;
         });
     }, []);
 
     const runCode = useCallback(() => {
-        if (is_running) return;
+        if (room.is_running) return;
         socket.current?.emit("run");
     }, [socket]);
 
@@ -84,27 +84,27 @@ export default function RoomPage() {
 
     return (
         <>
-            <ErrorPopups text={stderr} />
+            <ErrorPopups text={room.stderr} />
             <main className={styles.main_layout}>
                 <header style={{ gridArea: "header" }}>
                     <div>
                         <h1>
-                            <span className={styles.sp_weight}>Room</span> {room_code}
+                            <span className={styles.sp_weight}>Room {room.name}</span>
                         </h1>
                         <button
                             className={`icon_button ${styles.copy_button}`}
-                            onClick={() => navigator.clipboard.writeText(room_code as string)}
+                            onClick={() => navigator.clipboard.writeText(room.invite_token)}
                         >
                             <span>Copy room code</span> <CopySVG />
                         </button>
-                        <Connections connections={connections} />
+                        <Connections connections={room.connections} />
                     </div>
                     <div>
                         <button
-                            className={`${styles.run_button} ${is_running ? styles.running : ""} icon_button`}
+                            className={`${styles.run_button} ${room.is_running ? styles.running : ""} icon_button`}
                             onClick={() => runCode()}
                         >
-                            {is_running ? (
+                            {room.is_running ? (
                                 <>
                                     <ClockSVG />
                                     <p>Running...</p>
@@ -122,10 +122,27 @@ export default function RoomPage() {
                         </button>
                     </div>
                 </header>
-                <TextEditor label="Code editor" name="code" text={code} setText={setCode} socket={socket.current} />
-                <TextEditor label="Input" name="stdin" text={stdin} setText={setStdin} socket={socket.current} />
-                <TextStatic label="Output" style={{ gridArea: "stdout" }} text={stdout} />
+                <TextEditor
+                    label="Code editor"
+                    name="code"
+                    text={room.code}
+                    setText={room.setCode}
+                    locations={room.locations_code}
+                    setLocations={room.setLocationsCode}
+                    socket={socket.current}
+                />
+                <TextEditor
+                    label="Input"
+                    name="stdin"
+                    text={room.stdin}
+                    setText={room.setStdin}
+                    locations={room.locations_stdin}
+                    setLocations={room.setLocationsStdin}
+                    socket={socket.current}
+                />
+                <TextStatic label="Output" style={{ gridArea: "stdout" }} text={room.stdout} />
             </main>
         </>
     );
 }
+export default observer(RoomPage);

@@ -3,8 +3,9 @@ import styles from "./ErrorPopups.module.css";
 import CopySVG from "../../public/svg/copy.svg";
 import CloseSVG from "../../public/svg/close.svg";
 import { useEffect, useState } from "react";
+import { observer } from "mobx-react-lite";
 
-export const ErrorPopups = ({ text }: { text: string[] }) => {
+export const ErrorPopups = observer(({ text }: { text: string[] }) => {
     const [is_open, setIsOpen] = useState(() => true);
     useEffect(() => {
         setIsOpen(() => true);
@@ -35,4 +36,4 @@ export const ErrorPopups = ({ text }: { text: string[] }) => {
             )}
         </>
     );
-};
+});

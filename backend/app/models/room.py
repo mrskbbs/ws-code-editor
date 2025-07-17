@@ -59,6 +59,7 @@ class RoomDynamicModel():
 
         self.id = str(self.room_db.id)
         self.name = self.room_db.name
+        self.invite_token = self.room_db.invite_token
         
         # Room props
         self.code: list[str] = self.room.code.splitlines()

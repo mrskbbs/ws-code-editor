@@ -2,13 +2,14 @@ import { HTMLProps } from "react";
 import styles from "./TextStatic.module.css";
 import { Line } from "../Line/Line";
 import CopySVG from "../../public/svg/copy.svg";
+import { observer } from "mobx-react-lite";
 
 interface ITextStatic extends HTMLProps<HTMLDivElement> {
     text: string[];
     label?: string;
 }
 
-export const TextStatic = ({ label, text, ...div_props }: ITextStatic) => {
+export const TextStatic = observer(({ label, text, ...div_props }: ITextStatic) => {
     return (
         <div style={div_props.style} className={styles.container}>
             {label !== undefined && (
@@ -28,4 +29,4 @@ export const TextStatic = ({ label, text, ...div_props }: ITextStatic) => {
             </div>
         </div>
     );
-};
+});

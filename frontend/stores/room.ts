@@ -3,6 +3,7 @@ import { makeAutoObservable } from "mobx";
 
 export class RoomStore {
     name: string = "";
+    invite_token: string = "";
 
     code: string[] = [""];
     stdin: string[] = [""];
@@ -12,17 +13,26 @@ export class RoomStore {
     connections: IUserData[] = [];
     is_running: boolean = false;
 
-    locations: Map<string, Set<number>> = new Map();
+    locations_code: Map<string, Set<number>> = new Map();
+    locations_stdin: Map<string, Set<number>> = new Map();
 
     constructor() {
         makeAutoObservable(this);
     }
 
-    // setCode(diffs: { [key: number]: string | null }) {
-    //     this.code = diffApply(this.code, diffs);
-    // }
+    setCode(val: string[]) {
+        this.code = val;
+    }
 
-    // setStdin(diffs: { [key: number]: string | null }) {
-    //     this.code = diffApply(this.stdin, diffs);
-    // }
+    setStdin(val: string[]) {
+        this.code = val;
+    }
+
+    setLocationsCode(val: Map<string, Set<number>>) {
+        this.locations_code = val;
+    }
+
+    setLocationsStdin(val: Map<string, Set<number>>) {
+        this.locations_stdin = val;
+    }
 }

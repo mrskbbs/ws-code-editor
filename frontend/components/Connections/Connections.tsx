@@ -1,6 +1,7 @@
 import { useState } from "react";
 import styles from "./Connections.module.css";
-export const Connections = ({ connections }: { connections: string[] }) => {
+import { observer } from "mobx-react-lite";
+export const Connections = observer(({ connections }: { connections: IUserData[] }) => {
     const [is_open, setIsOpen] = useState(() => false);
     const SLICE_NUM = 5;
     return (
@@ -9,8 +10,8 @@ export const Connections = ({ connections }: { connections: string[] }) => {
             <div className={styles.conns}>
                 {connections.slice(0, SLICE_NUM).map((conn) => (
                     <>
-                        <span key={conn} className={styles.user_circle}>
-                            <p>{conn}</p>
+                        <span key={conn.id} className={styles.user_circle}>
+                            <p>{conn.username}</p>
                         </span>
                     </>
                 ))}
@@ -23,8 +24,8 @@ export const Connections = ({ connections }: { connections: string[] }) => {
                     <div className={styles.hidden_users}>
                         {connections.slice(SLICE_NUM, connections.length).map((conn) => (
                             <>
-                                <span key={conn} className={styles.user_circle}>
-                                    <p>{conn}</p>
+                                <span key={conn.id} className={styles.user_circle}>
+                                    <p>{conn.username}</p>
                                 </span>
                             </>
                         ))}
@@ -33,4 +34,4 @@ export const Connections = ({ connections }: { connections: string[] }) => {
             </div>
         </div>
     );
-};
+});

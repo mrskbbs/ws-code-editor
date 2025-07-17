@@ -1,8 +1,9 @@
 import uuid
 from flask import Request, session
 from flask_socketio import emit, join_room, leave_room
+from sqlalchemy import update
 from app.db import injectDb
-from app.models.room import RoomDynamicModel
+from app.models.room import RoomDynamicModel, RoomModelNew
 from app.models.user import UserModelNew
 from app.services.auth import AuthService
 from app.services.room import RoomService
@@ -69,7 +70,10 @@ class RoomWSController():
         
         join_room(room=str(self.room.id), sid=str(self.user.id))
         self.room.connections.add(self.user)
-
+        emit("init", {
+            "name": room.name,
+            "invite": room.invite_token
+        })
         emit("code", self.__formatListToJson__(self.room.code), to=str(self.user.id))
         emit("stdin", self.__formatListToJson__(self.room.stdin), to=str(self.user.id))
         emit("stdout", self.room.stdout, to=str(self.user.id))
@@ -80,7 +84,8 @@ class RoomWSController():
         )
 
 
-    def disconnect(self):
+    @injectDb
+    def disconnect(self, db: Session):
         leave_room(room=str(self.room.id), sid=str(self.user.id))
         self.room.connections.remove(self.user)
 
@@ -91,6 +96,19 @@ class RoomWSController():
         )
 
         if len(self.room.connections) == 0:
+            try:
+                update(RoomModelNew).values(
+                    code="\n".join(self.room.code),
+                    stdin="\n".join(self.room.stdin),
+                ).where(
+                    id=self.room.id
+                )
+                db.commit()
+                
+            except: 
+                logger.warning(f"Failed to save state for room #{self.room.id}")
+                db.rollback()
+
             self.rooms.pop(self.room.id, None)
 
     def setCode(self, diffs: dict[int, str | None]):
