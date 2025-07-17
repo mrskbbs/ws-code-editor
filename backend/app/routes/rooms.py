@@ -14,18 +14,18 @@ router = Blueprint("rooms", __name__, url_prefix="/rooms")
 def middleware():
     return authMiddleware(request)
 
-@router.post("/rooms")
+@router.post("/")
 def createRoom():
     return RoomController(request).create()
 
-@router.get("/rooms")
+@router.get("/")
 def getMyRooms():
     return RoomController(request).getMy()
 
-@router.delete("/rooms/<room_id>")
+@router.delete("/<room_id>")
 def deleteRoom(room_id: str):
     return RoomController(request).delete(room_id)
 
-@router.get("/rooms/<room_id>/invite/<invite_token>")
+@router.get("/<room_id>/invite/<invite_token>")
 def acceptInvite(room_id: str, invite_token: str):
     return RoomController(request).acceptInvite(room_id, invite_token)

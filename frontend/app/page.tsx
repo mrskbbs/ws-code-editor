@@ -25,35 +25,21 @@ export default function Home() {
 
     return (
         <div className={styles.container}>
-            <h1>
-                Websocket Code Editor
-                <hr />
-            </h1>
+            <h1>Websocket Code Editor</h1>
+            <hr />
             <p>
-                Editor where you can edit your code toghether! This is the first finished iteration of this project
-                (MVP). But I plan on improving it over the summer , because I do have some interesting ideas
+                Editor where you can edit your code toghether! This is might be the final iteration for now, but who
+                knows :)
             </p>
-            <div className={styles.room_containers}>
-                <div>
-                    <p>Create your own room</p>
-                    <button className="beauty_button" onClick={onClickCreateButton}>
-                        Create
-                    </button>
-                </div>
-                <div>
-                    <p>Join someone elses room</p>
-                    <input
-                        ref={input_ref}
-                        id="room_code"
-                        name="room_code"
-                        type="text"
-                        placeholder={"Enter room code"}
-                    />
-                    {error !== null && <p className="error">{error}</p>}
-                    <button className="beauty_button" onClick={onClickJoinButton}>
-                        Join
-                    </button>
-                </div>
+            <hr />
+            <div>
+                <p>
+                    In order to use this app you need to <a href="/auth/login">log in</a> or{" "}
+                    <a href="/auth/signup">create an account</a> first
+                </p>
+                <p>
+                    Now that you're logged in you can <a href="/me">go to your page</a>
+                </p>
             </div>
         </div>
     );

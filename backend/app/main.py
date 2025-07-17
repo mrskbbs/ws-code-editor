@@ -17,9 +17,10 @@ app.register_blueprint(auth_router)
 # Flask SocketIO config
 socketio = SocketIO(
     app, 
+    path="/ws",
     cors_allowed_origins=FRONTEND_URL, 
     cors_credentials=True,
-    logger=True # TODO: maybe write your own logger
+    logger=True
 )
 socketio.init_app(app)
 socketio.on_namespace(RoomWS("/room"))

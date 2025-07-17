@@ -20,8 +20,6 @@ from app.models.associations import association_user_room
 
 class RoomModelNew(Base, SerializerMixin):
     __tablename__ = "room"
-    serialize_rules = ('-users.rooms', '-creator.rooms',)
-
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 
         primary_key=True, 

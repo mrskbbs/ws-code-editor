@@ -1,6 +1,8 @@
+from datetime import datetime
 from flask import Request, Response, make_response
+from app.models.user import UserModelNew
 from app.services.auth import AuthService
-from app.utils import createUserToken, logger
+from app.utils import createUserToken, injectUser, logger
 
 class AuthController():
     request: Request
@@ -12,12 +14,30 @@ class AuthController():
     
 
     def __addTokenCookie__(self, response: Response, token: str):
-        response.set_cookie("auth_token", token) # TODO: SOME SECURITY IN TOKEN SETTINGS
+        response.set_cookie("auth_token", token, max_age=int(2.592e6)) # Available for one month
+
+
+    def __removeTokenCookie__(self, response: Response):
+        response.set_cookie("auth_token", "", max_age=0)
 
 
     def verifyToken(self):
         user = AuthService().verifyToken(self.auth_token)
         return user
+
+
+    @injectUser
+    def getMyself(self, user: UserModelNew):
+        response = make_response()
+        
+        if user == None:
+            response.status = 403
+            return response
+
+        response.data = user.to_dict(only=("id","username",))
+        response.status = 200
+
+        return response
 
 
     def signup(self):
@@ -57,7 +77,7 @@ class AuthController():
                 raise KeyError("No authentication token provided")
 
             AuthService().logout(self.auth_token)
-            self.__addTokenCookie__(response, "")
+            self.__removeTokenCookie__(response)
             response.status = 200
         except KeyError as exc:
             response.status = 400

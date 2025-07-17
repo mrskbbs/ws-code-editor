@@ -4,6 +4,11 @@ from app.controllers.auth import AuthController
 
 router = Blueprint("auth", __name__, url_prefix="/auth")
 
+
+@router.get("/me")
+def getMyself():
+    return AuthController(request).getMyself()
+
 @router.post("/signup")
 def signup():
     return AuthController(request).signup()

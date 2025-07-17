@@ -183,12 +183,16 @@ svg {
 input {
     color: var(--foreground);
     height: 100%;
+    min-height: 3em;
     border: solid var(--foreground) 0.1em;
     border-radius: 0.5em;
     font-family: "Montserrat";
     font-weight: 400;
     padding: 3% !important;
     padding-left: 1em !important;
+    transition: 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+input[type="password"] {
     transition: 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 input::selection {
@@ -204,8 +208,6 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     -webkit-background-clip: text;
     -webkit-text-fill-color: var(--foreground);
-    transition: background-color 5000s ease-in-out 0s;
-    box-shadow: inset 0 0 20px 20px #23232329;
 }
 a {
     color: var(--foreground);

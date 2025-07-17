@@ -9,8 +9,8 @@ engine = create_engine(DB_URL)
 
 SessionLocal = sessionmaker(
     bind=engine,
-    # autoflush=False, TODO: change if needed
-    # autocommit = False
+    autoflush=False,
+    autocommit = False,
 )
 
 @contextmanager

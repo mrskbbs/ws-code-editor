@@ -35,7 +35,7 @@ class RoomWSController():
 
 
     def __formatConnections__(self) -> list[dict]:
-        return [user.to_dict(only=("id", "username")) for user in self.room.connections]
+        return [user.to_dict(only=("id", "username",)) for user in self.room.connections]
 
 
     def __sendError__(self, text: list[str], exc: Exception):
@@ -47,8 +47,12 @@ class RoomWSController():
 
 
     def connect(self):
+        if self.user == None:
+            raise Exception("You are not authorized")
+
         room_id = uuid.UUID(self.request.args.get("room_id"))
         room = self.rooms.get(room_id) 
+
         try:
             if room == None:
                 room_db = RoomService().get(room_id)

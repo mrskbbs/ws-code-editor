@@ -30,7 +30,17 @@ class RoomController():
         try:
             rooms: list[RoomModelNew] = RoomService().getMy(user)
 
-            response.data = [room.to_dict() for room in rooms]
+            response.data = [room.to_dict(
+                only=(
+                    'id',
+                    'name',
+                    'users.id',
+                    'users.username',
+                    'creator.id',
+                    'creator.username',
+                    'created_at',
+                )
+            ) for room in rooms]
             response.status = 200
 
         except Exception as exc:
