@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.83.0",
     "mobx": "^6.13.7",
     "mobx-react-lite": "^4.1.0",
     "next": "15.3.2",

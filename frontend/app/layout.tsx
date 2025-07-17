@@ -1,5 +1,3 @@
-"use client";
-import { useEffect } from "react";
 import "./globals.css";
 
 export default function RootLayout({
@@ -7,9 +5,6 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    useEffect(() => {
-        (async () => await fetch(`http://localhost:5000/auth/token`, { method: "GET", credentials: "include" }))();
-    }, []);
     return (
         <html lang="en">
             <body>

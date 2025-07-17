@@ -9,7 +9,7 @@ class AuthStore {
         makeAutoObservable(this);
     }
 
-    async update() {
+    update() {
         getMyself()
             .then((new_user) => (this.user = new_user))
             .catch((err) => {
