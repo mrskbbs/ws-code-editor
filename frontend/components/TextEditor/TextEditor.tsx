@@ -94,6 +94,7 @@ export const TextEditor = ({
         e.currentTarget.style.height = `${new_text.length * 1.25}em`;
         stageChanges(new_text);
     }, []);
+
     const onSelectTextarea = useCallback(
         (e: React.SyntheticEvent<HTMLTextAreaElement, Event>) => {
             const sel_start = e.currentTarget.selectionStart;
@@ -116,9 +117,11 @@ export const TextEditor = ({
     const focusTextarea = useCallback(() => {
         textarea.current?.focus();
     }, [textarea]);
+
     const onFocusInTextarea = useCallback((e: React.FocusEvent<HTMLTextAreaElement, Element>) => {
         // TODO MAYBE DELETE
     }, []);
+
     const onFocusOutTextarea = useCallback((e: React.FocusEvent<HTMLTextAreaElement, Element>) => {
         socket.emit(`${name}_location`, []);
     }, []);

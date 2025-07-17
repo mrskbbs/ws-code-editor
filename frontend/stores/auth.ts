@@ -3,10 +3,12 @@ import { makeAutoObservable } from "mobx";
 
 class AuthStore {
     user: IUserData | null = null;
+
     constructor() {
         this.user = null;
         makeAutoObservable(this);
     }
+
     async update() {
         getMyself()
             .then((new_user) => (this.user = new_user))
@@ -17,4 +19,4 @@ class AuthStore {
     }
 }
 
-const auth_store = new AuthStore();
+export const auth_store = new AuthStore();
