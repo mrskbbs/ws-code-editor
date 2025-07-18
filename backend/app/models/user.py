@@ -5,7 +5,7 @@ from typing import Optional
 import uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import ForeignKey, func
+from sqlalchemy import ForeignKey, func, CheckConstraint
 from sqlalchemy_serializer import SerializerMixin
 
 from app.models.base import Base
@@ -29,9 +29,19 @@ class UserModelNew(Base, SerializerMixin):
     sessions: Mapped[list["SessionModel"]] = relationship(back_populates="user")
     rooms: Mapped[list["RoomModelNew"]] = relationship(
         secondary=association_user_room,
-        back_populates="user"
+        back_populates="users"
     )
 
+    __table_args__ = (
+        CheckConstraint(
+            "username ~ '^[a-zA-Z0-9_]+$'", 
+            "username_regex_check"
+        ),
+        CheckConstraint(
+            "email ~ '^[\\w\\.-]+\\@[\\w-]+\\.[\\w-]{2,4}$'", 
+            "email_regex_check"
+        ),
+    )
 
     def __eq__(self, other):
         if not isinstance(other, UserModelNew):

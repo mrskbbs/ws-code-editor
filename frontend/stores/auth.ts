@@ -1,4 +1,4 @@
-import { getMyself } from "@/api/auth";
+import { getMyself, login, signup } from "@/api/auth";
 import { makeAutoObservable } from "mobx";
 
 class AuthStore {
@@ -15,6 +15,26 @@ class AuthStore {
             .catch((err) => {
                 console.error("Failed to get user credentials");
                 this.user = null;
+            });
+    }
+
+    signup(data: ISignupData) {
+        signup(data)
+            .then(() => {
+                this.update();
+            })
+            .catch((err) => {
+                console.log("Failed to signup");
+            });
+    }
+
+    login(data: ILoginData) {
+        login(data)
+            .then(() => {
+                this.update();
+            })
+            .catch((err) => {
+                console.log("Failed to signup");
             });
     }
 }

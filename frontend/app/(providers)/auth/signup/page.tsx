@@ -1,5 +1,6 @@
 "use client";
 
+import { auth_store } from "@/stores/auth";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
@@ -9,12 +10,16 @@ export default function SignupPage() {
     const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const form_data = new Map(new FormData(e.currentTarget).entries());
-        for (let value of form_data.values()) {
+        const payload: any = {};
+        for (let [key, value] of form_data.entries()) {
             if (!value) {
                 console.error("Invalid field");
                 return;
             }
+
+            payload[key] = value.toString();
         }
+        auth_store.signup(payload as ISignupData);
         router.push("/me");
     }, []);
 

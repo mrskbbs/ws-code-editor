@@ -1,11 +1,23 @@
-from sqlalchemy import ForeignKey, Table
-from sqlalchemy.orm import mapped_column, relationship
-
-from app.model.base import Base
+import uuid
+from sqlalchemy import Column, ForeignKey, Table
+from sqlalchemy.dialects.postgresql import UUID
+from app.models.base import Base
 
 association_user_room = Table(
     "association_room_user",
     Base.metadata,
-    mapped_column("user_id_fk", ForeignKey("user_.id"), primary_key=True, ondelete="CASCADE", onupdate="CASCADE"),
-    mapped_column("room_id_fk", ForeignKey("room.id"), primary_key=True, ondelete="CASCADE", onupdate="CASCADE")
+    Column(
+        "user_id_fk", 
+        UUID(as_uuid=True), 
+        ForeignKey("user_.id", ondelete="CASCADE", onupdate="CASCADE"), 
+        primary_key=True, 
+        nullable=False
+    ),
+    Column(
+        "room_id_fk", 
+        UUID(as_uuid=True), 
+        ForeignKey("room.id", ondelete="CASCADE", onupdate="CASCADE"), 
+        primary_key=True, 
+        nullable=False
+    ),
 )

@@ -26,7 +26,7 @@ class SessionModel(Base, SerializerMixin):
     user: Mapped["UserModelNew"] = relationship(back_populates="sessions")
     
     auth_token: Mapped[str] = mapped_column(unique=True)
-    user_agent: Mapped[Optional(str)]
+    user_agent: Mapped[Optional[str]]
     
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     

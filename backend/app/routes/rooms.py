@@ -1,3 +1,4 @@
+from venv import logger
 from flask import request
 from flask_socketio import Namespace, emit
 from app.controllers.rooms import RoomController
@@ -12,7 +13,8 @@ router = Blueprint("rooms", __name__, url_prefix="/rooms")
 
 @router.before_request
 def middleware():
-    return authMiddleware(request)
+    logger.debug("BEFORE REQ")
+    authMiddleware(request)
 
 @router.post("/")
 def createRoom():

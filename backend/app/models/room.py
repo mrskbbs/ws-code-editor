@@ -2,8 +2,8 @@ from hashlib import sha256
 
 from sqlalchemy_serializer import SerializerMixin
 from app.config import CONTAINER_NAME, CONTAINER_USER, CONTAINER_WORKDIR, SALT
-from app.model.base import Base
-from app.model.user import UserModel
+from app.models.base import Base
+from app.models.user import UserModel
 from app.docker import docker_client
 from datetime import datetime
 from base64 import b64encode

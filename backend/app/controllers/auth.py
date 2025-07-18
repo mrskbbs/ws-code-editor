@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 from flask import Request, Response, make_response
 from app.models.user import UserModelNew
 from app.services.auth import AuthService
@@ -9,7 +10,7 @@ class AuthController():
     
     def __init__(self, request: Request):
         self.request = request
-        self.body = request.get_json()
+        self.body = request.get_json() if (request.headers.get("Content-Type") == "application/json") else "" 
         self.auth_token = request.cookies.get("auth_token")
     
 
@@ -33,8 +34,7 @@ class AuthController():
         if user == None:
             response.status = 403
             return response
-
-        response.data = user.to_dict(only=("id","username",))
+        response.data = json.loads(user.to_dict(only=("id","username",)))
         response.status = 200
 
         return response
@@ -46,10 +46,11 @@ class AuthController():
             if self.auth_token:
                 raise Exception("You need to log out first")
             
-            token = AuthService().signup(self.body, self.request.user_agent)
+            token = AuthService().signup(self.body, self.request.user_agent.string)
             self.__addTokenCookie__(response, token)
             response.status = 201
         except Exception as exc:
+            logger.error(exc)
             response.status = 500
         finally:
             return response
@@ -61,10 +62,11 @@ class AuthController():
             if self.auth_token:
                 raise Exception("You need to log out first")
 
-            token = AuthService().login(self.body, self.request.user_agent)
+            token = AuthService().login(self.body, self.request.user_agent.string)
             self.__addTokenCookie__(response, token)
             response.status = 201
         except Exception as exc:
+            logger.error(exc)
             response.status = 500
         finally:
             return response
@@ -80,8 +82,10 @@ class AuthController():
             self.__removeTokenCookie__(response)
             response.status = 200
         except KeyError as exc:
+            logger.error(exc)
             response.status = 400
         except Exception as exc:
+            logger.error(exc)
             response.status = 500
         finally:
             return response

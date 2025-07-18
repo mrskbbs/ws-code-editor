@@ -15,7 +15,7 @@ class AuthService():
     def __createToken__(self, id: uuid.UUID) -> str:
         token = jwt.encode({
             "id": str(id),
-            "iat": datetime.datetime.now()
+            "iat": int(datetime.datetime.now().timestamp())
         }, JWT_KEY, JWT_ALGO)
         return token
     
@@ -64,7 +64,10 @@ class AuthService():
             body["password"] = sha256salt(body["password"])
 
             user = db.scalars(
-                select(UserModelNew).where(unwrapForWhereClasue(body))
+                select(UserModelNew).where(and_(
+                    UserModelNew.email == body["email"],
+                    UserModelNew.password == body["password"],
+                ))
             ).first()
             db.flush()
             
