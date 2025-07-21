@@ -59,7 +59,7 @@ class AuthService():
 
 
     @injectDb
-    def login(self, body: AuthLogin, user_agent: str | None, db: Session):
+    def login(self, body: AuthLogin, user_agent: str, db: Session):
         try:
             body["password"] = sha256salt(body["password"])
 
@@ -69,7 +69,6 @@ class AuthService():
                     UserModelNew.password == body["password"],
                 ))
             ).first()
-            db.flush()
             
             if not user: raise Exception("Invalid credentials")
 
@@ -80,8 +79,9 @@ class AuthService():
                 user_agent = user_agent,
             )
             db.add(session)
-
             db.commit()
+
+            return auth_token
 
         except Exception as exc:
             db.rollback()

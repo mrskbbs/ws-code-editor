@@ -3,14 +3,16 @@ import json
 from flask import Request, Response, make_response
 from app.models.user import UserModelNew
 from app.services.auth import AuthService
-from app.utils import createUserToken, injectUser, logger
+from app.types.auth import AuthSessionInfo
+from app.utils import injectUser, logger
 
 class AuthController():
     request: Request
     
     def __init__(self, request: Request):
         self.request = request
-        self.body = request.get_json() if (request.headers.get("Content-Type") == "application/json") else "" 
+        if (request.headers.get("Content-Type") == "application/json"):
+            self.body = request.get_json() 
         self.auth_token = request.cookies.get("auth_token")
     
 
@@ -28,14 +30,15 @@ class AuthController():
 
 
     @injectUser
-    def getMyself(self, user: UserModelNew):
+    def getMyself(self, user: AuthSessionInfo):
         response = make_response()
         
         if user == None:
             response.status = 403
             return response
-        response.data = json.loads(user.to_dict(only=("id","username",)))
+        
         response.status = 200
+        response.data = json.dumps(user)
 
         return response
 
@@ -85,7 +88,7 @@ class AuthController():
             logger.error(exc)
             response.status = 400
         except Exception as exc:
-            logger.error(exc)
+            print(exc)
             response.status = 500
         finally:
             return response

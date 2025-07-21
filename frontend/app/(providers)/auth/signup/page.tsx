@@ -20,6 +20,7 @@ export default function SignupPage() {
             payload[key] = value.toString();
         }
         auth_store.signup(payload as ISignupData);
+        router.prefetch("/me");
         router.push("/me");
     }, []);
 

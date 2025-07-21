@@ -1,5 +1,5 @@
 import { getMyself, login, signup } from "@/api/auth";
-import { makeAutoObservable } from "mobx";
+import { computed, makeAutoObservable } from "mobx";
 
 class AuthStore {
     user: IUserData | null = null;
@@ -9,13 +9,8 @@ class AuthStore {
         makeAutoObservable(this);
     }
 
-    update() {
-        getMyself()
-            .then((new_user) => (this.user = new_user))
-            .catch((err) => {
-                console.error("Failed to get user credentials");
-                this.user = null;
-            });
+    async update() {
+        this.user = await getMyself();
     }
 
     signup(data: ISignupData) {

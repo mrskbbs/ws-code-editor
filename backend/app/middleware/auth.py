@@ -1,4 +1,4 @@
-from flask import Request, make_response, session
+from flask import Request, make_response, session, g
 
 from app.utils import logger
 from app.services.auth import AuthService
@@ -7,7 +7,7 @@ def authMiddleware(request: Request):
     response = make_response()
     try:
         user = AuthService().verifyToken(request.cookies.get("auth_token"))
-        session["user"] = user
+        session["user"] = user.to_dict(only=("id", "username",),)
     
     except ValueError as exc:
         logger.error(exc)

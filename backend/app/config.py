@@ -6,6 +6,8 @@ load_dotenv()
 
 SALT = os.getenv("SALT", "default_sault_value")
 
+TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
+
 DB_URL = os.getenv("DB_URL", "postgresql://username:password@localhost:5432/code_editor")
 
 JWT_KEY = os.getenv("JWT_KEY", "SUPERSECRET")

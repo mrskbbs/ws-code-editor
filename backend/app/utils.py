@@ -2,7 +2,7 @@ from datetime import datetime
 from functools import wraps
 import logging
 import coloredlogs
-from flask import Request, session
+from flask import Request, session, g
 from hashlib import sha256
 
 from sqlalchemy import and_
@@ -13,14 +13,6 @@ if SAVE_LOGS:
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="DEBUG")
-
-def createUserToken(request: Request) -> str:
-    return sha256(
-        request.user_agent.__str__().encode() + 
-        datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f").encode() +
-        request.remote_addr.encode() + 
-        SALT.encode()
-    ).hexdigest()
 
 def sha256salt(s: str) -> str:
     return sha256(
@@ -33,6 +25,6 @@ def unwrapForWhereClasue(model, d: dict):
 def injectUser(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        kwargs["user"] = session["user"]
+        kwargs["user"] = session.get("user")
         return f(*args, **kwargs)
     return wrapper

@@ -5,6 +5,7 @@ export async function getMyself() {
         method: "GET",
         credentials: "include",
         mode: FETCH_MODE,
+        cache: "force-cache",
     });
     if (!res.ok) throw Error("Failed to get credentials");
 

@@ -12,7 +12,8 @@ export async function getMyRooms() {
 }
 
 export async function createRoom(data: IRoomCreateData) {
-    const res = await fetch(`${BACKEND_URL}/rooms`, {
+    console.log(data);
+    const res = await fetch(`${BACKEND_URL}/rooms/`, {
         method: "POST",
         credentials: "include",
         body: JSON.stringify(data),
@@ -20,6 +21,7 @@ export async function createRoom(data: IRoomCreateData) {
             "Content-Type": "application/json",
         },
         mode: FETCH_MODE,
+        cache: "force-cache",
     });
 
     if (!res.ok) throw Error("Failed to create a room");

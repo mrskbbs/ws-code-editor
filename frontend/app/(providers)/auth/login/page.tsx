@@ -20,6 +20,7 @@ export default function LoginPage() {
             payload[key] = value.toString();
         }
         auth_store.login(payload as ILoginData);
+        router.prefetch("/me");
         router.push("/me");
     }, []);
 

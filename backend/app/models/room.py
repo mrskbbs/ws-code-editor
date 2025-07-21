@@ -3,7 +3,6 @@ from hashlib import sha256
 from sqlalchemy_serializer import SerializerMixin
 from app.config import CONTAINER_NAME, CONTAINER_USER, CONTAINER_WORKDIR, SALT
 from app.models.base import Base
-from app.models.user import UserModel
 from app.docker import docker_client
 from datetime import datetime
 from base64 import b64encode
@@ -17,6 +16,7 @@ from sqlalchemy import ForeignKey, Table, func
 
 from app.models.base import Base
 from app.models.associations import association_user_room
+from app.types.auth import HashableAuthSessionInfo
 
 class RoomModelNew(Base, SerializerMixin):
     __tablename__ = "room"
@@ -62,13 +62,13 @@ class RoomDynamicModel():
         self.invite_token = self.room_db.invite_token
         
         # Room props
-        self.code: list[str] = self.room.code.splitlines()
-        self.stdin: list[str] = self.room.stdin.splitlines()
+        self.code: list[str] = self.room_db.code.splitlines()
+        self.stdin: list[str] = self.room_db.stdin.splitlines()
         self.stdout: list[str] = list()
         self.stderr: list[str] = list()
         self.code_location: dict[uuid.UUID, list[int]] = dict()
         self.stdin_location: dict[uuid.UUID, list[int]] = dict()
-        self.connections: set["UserModelNew"] = set()
+        self.connections: set[HashableAuthSessionInfo] = set()
         self.is_running: bool = False
 
     # Function to handle code/stdin changes

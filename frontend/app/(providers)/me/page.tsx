@@ -1,16 +1,16 @@
 "use client";
 
 import { getMyRooms } from "@/api/room";
+import { RoomCreate } from "@/components/RoomCreate/RoomCreate";
+import { auth_store } from "@/stores/auth";
 import { useQuery } from "@tanstack/react-query";
+import { observer } from "mobx-react-lite";
 
-export default function MePage() {
+function MePage() {
     const { data: rooms, isLoading } = useQuery({ queryFn: getMyRooms, queryKey: ["my", "rooms"] });
     return (
         <div>
-            <div>
-                <input id="name" name="name" type="text" />
-                <button>Create room</button>
-            </div>
+            <RoomCreate />
             {isLoading ? (
                 <p>Loading...</p>
             ) : rooms === undefined ? (
@@ -25,3 +25,5 @@ export default function MePage() {
         </div>
     );
 }
+
+export default observer(MePage);

@@ -1,26 +1,29 @@
 import uuid
 from flask import Request, session
-from flask_socketio import emit, join_room, leave_room
+from flask_socketio import disconnect, emit, join_room, leave_room
 from sqlalchemy import update
 from app.db import injectDb
 from app.models.room import RoomDynamicModel, RoomModelNew
 from app.models.user import UserModelNew
 from app.services.auth import AuthService
 from app.services.room import RoomService
+from app.types.auth import AuthSessionInfo, HashableAuthSessionInfo
 from app.utils import logger
 from sqlalchemy.orm import Session
 
 class RoomWSController():
     request: Request
     rooms: dict[uuid.UUID, RoomDynamicModel]
-    room: RoomDynamicModel
-    user: UserModelNew
+    room: RoomDynamicModel = None
+    user: AuthSessionInfo
 
-    @injectDb
-    def __init__(self, request: Request, rooms: dict[uuid.UUID, RoomDynamicModel], db: Session):
+    def __init__(self, request: Request, rooms: dict[uuid.UUID, RoomDynamicModel]):
         self.request = request
         self.rooms = rooms
         self.user = session["user"]
+
+        self.room_id = uuid.UUID(self.request.args.get("room_id"))
+        self.room = self.rooms.get(self.room_id)
         
     
     def __formatListToJson__(self, arr) -> dict:
@@ -36,7 +39,7 @@ class RoomWSController():
 
 
     def __formatConnections__(self) -> list[dict]:
-        return [user.to_dict(only=("id", "username",)) for user in self.room.connections]
+        return [user.full for user in self.room.connections]
 
 
     def __sendError__(self, text: list[str], exc: Exception):
@@ -48,35 +51,38 @@ class RoomWSController():
 
 
     def connect(self):
-        if self.user == None:
-            raise Exception("You are not authorized")
-
-        room_id = uuid.UUID(self.request.args.get("room_id"))
-        room = self.rooms.get(room_id) 
-
         try:
-            if room == None:
-                room_db = RoomService().get(room_id)
-                self.rooms[room_id] = RoomDynamicModel(room_db)
-                self.room = self.rooms[room_id]
-            else:
+            if self.user == None:
+                raise Exception("You are not authorized")
+            if self.room_id == None:
+                raise Exception("No room id is provided")
+
+
+            if self.room_id in self.rooms:
+                self.room = self.rooms.get(self.room_id)
+            else: 
+                room_db: RoomModelNew = RoomService().get(self.room_id)
+                room = RoomDynamicModel(room_db)
+                self.rooms[self.room_id] = room
                 self.room = room
 
         except Exception:
+            disconnect()
             raise Exception("Room does not exist")
         
-        if self.user in self.room.connections:
+        if self.user["id"] in self.room.connections:
+            disconnect()
             raise Exception("You are already present in this room from another device")
         
-        join_room(room=str(self.room.id), sid=str(self.user.id))
-        self.room.connections.add(self.user)
+        join_room(room=str(self.room.id), sid=self.request.sid)
+        self.room.connections.add(HashableAuthSessionInfo(self.user))
         emit("init", {
-            "name": room.name,
-            "invite": room.invite_token
+            "name": self.room.name,
+            "invite_token": self.room.invite_token
         })
-        emit("code", self.__formatListToJson__(self.room.code), to=str(self.user.id))
-        emit("stdin", self.__formatListToJson__(self.room.stdin), to=str(self.user.id))
-        emit("stdout", self.room.stdout, to=str(self.user.id))
+        emit("code", self.__formatListToJson__(self.room.code), to=self.request.sid)
+        emit("stdin", self.__formatListToJson__(self.room.stdin), to=self.request.sid)
+        emit("stdout", self.room.stdout, to=self.request.sid)
         emit(
             "connections", 
             self.__formatConnections__(), 
@@ -86,8 +92,8 @@ class RoomWSController():
 
     @injectDb
     def disconnect(self, db: Session):
-        leave_room(room=str(self.room.id), sid=str(self.user.id))
-        self.room.connections.remove(self.user)
+        leave_room(room=str(self.room.id), sid=self.request.sid)
+        self.room.connections.remove(HashableAuthSessionInfo(self.user))
 
         emit(
             "connections", 
@@ -130,12 +136,12 @@ class RoomWSController():
     def locationCode(self, location: list[int]):
         try:
             if len(location) > 0: 
-                self.room.code_location[self.user.id] = location
+                self.room.code_location[self.user["id"]] = location
             else: 
-                self.room.code_location.pop(self.user.id, None)
+                self.room.code_location.pop(self.user["id"], None)
             emit("code_location", {
                 "location": location,
-                "user": str(self.user.id),
+                "user": str(self.user["id"]),
             }, to=self.room.id, include_self=False)
         except Exception as exc:
             self.__sendError__(["Error occured while trying to change code location:"], exc)
@@ -143,12 +149,12 @@ class RoomWSController():
     def locationStdin(self, location: list[int]):
         try:
             if len(location) > 0: 
-                self.room.stdin_location[self.user.id] = location
+                self.room.stdin_location[self.user["id"]] = location
             else: 
-                self.room.stdin_location.pop(self.user.id, None)
+                self.room.stdin_location.pop(self.user["id"], None)
             emit("stdin_location", {
                 "location": location,
-                "user": str(self.user.id),
+                "user": str(self.user["id"]),
             }, to=self.room.id, include_self=False)
         except Exception as exc:
             self.__sendError__(["Error occured while trying to change stdin location:"], exc)
