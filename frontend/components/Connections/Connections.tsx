@@ -9,11 +9,9 @@ export const Connections = observer(({ connections }: { connections: IUserData[]
             <p>Connections:</p>
             <div className={styles.conns}>
                 {connections.slice(0, SLICE_NUM).map((conn) => (
-                    <>
-                        <span key={conn.id} className={styles.user_circle}>
-                            <p>{conn.username}</p>
-                        </span>
-                    </>
+                    <span key={conn.id} className={styles.user_circle}>
+                        <p>{conn.username}</p>
+                    </span>
                 ))}
                 {connections.length > SLICE_NUM && (
                     <button className={styles.show_btn} onClick={() => setIsOpen((prev) => !prev)}>
@@ -23,11 +21,9 @@ export const Connections = observer(({ connections }: { connections: IUserData[]
                 {is_open && (
                     <div className={styles.hidden_users}>
                         {connections.slice(SLICE_NUM, connections.length).map((conn) => (
-                            <>
-                                <span key={conn.id} className={styles.user_circle}>
-                                    <p>{conn.username}</p>
-                                </span>
-                            </>
+                            <span key={conn.id} className={styles.user_circle}>
+                                <p>{conn.username}</p>
+                            </span>
                         ))}
                     </div>
                 )}

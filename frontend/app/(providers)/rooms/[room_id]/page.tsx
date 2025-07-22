@@ -30,6 +30,7 @@ function RoomPage() {
     });
 
     useEffect(() => {
+        console.log(room);
         // Init data
         socket.current?.on("init", (data) => {
             room.name = data.name;
@@ -39,19 +40,19 @@ function RoomPage() {
             room.connections = data;
         });
         socket.current?.on("run", (data) => {
-            room.is_running = data;
+            room.setIsRunning(data);
         });
         socket.current?.on("code", (diffs) => {
-            room.code = diffApply(room.code, diffs);
+            room.setCode(diffApply(room.code, diffs));
         });
         socket.current?.on("stdin", (diffs) => {
-            room.stdin = diffApply(room.stdin, diffs);
+            room.setStdin(diffApply(room.stdin, diffs));
         });
         socket.current?.on("stdout", (data) => {
-            room.stdout = data;
+            room.setStdout(data);
         });
         socket.current?.on("stderr", (data) => {
-            room.stderr = data;
+            room.setStderr(data);
         });
     }, []);
 
@@ -123,21 +124,23 @@ function RoomPage() {
                     </div>
                 </header>
                 <TextEditor
+                    key={"code"}
                     label="Code editor"
                     name="code"
                     text={room.code}
-                    setText={room.setCode}
+                    setText={(val) => room.setCode(val)}
                     locations={room.locations_code}
-                    setLocations={room.setLocationsCode}
+                    setLocations={(val) => room.setLocationsCode(val)}
                     socket={socket.current}
                 />
                 <TextEditor
+                    key={"stdin"}
                     label="Input"
                     name="stdin"
                     text={room.stdin}
-                    setText={room.setStdin}
+                    setText={(val) => room.setStdin(val)}
                     locations={room.locations_stdin}
-                    setLocations={room.setLocationsStdin}
+                    setLocations={(val) => room.setLocationsStdin(val)}
                     socket={socket.current}
                 />
                 <TextStatic label="Output" style={{ gridArea: "stdout" }} text={room.stdout} />

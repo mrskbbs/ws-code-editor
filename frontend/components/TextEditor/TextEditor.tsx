@@ -3,6 +3,8 @@ import styles from "./TextEditor.module.css";
 import { diffApply, diffCreate, jsonKey } from "@/utils";
 import React, { Dispatch, RefObject, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
+import { auth_store } from "@/stores/auth";
+import { Lines } from "./Lines/Lines";
 // Input socket + useState ???
 export const TextEditor = observer(
     ({
@@ -26,7 +28,6 @@ export const TextEditor = observer(
         const last_timeout = useRef(null as ReturnType<typeof setTimeout> | null);
 
         const code_editor = useRef(null) as RefObject<HTMLDivElement | null>;
-        const indexes = useRef(null) as RefObject<HTMLDivElement | null>;
         const textarea = useRef(null) as RefObject<HTMLTextAreaElement | null>;
 
         useEffect(() => {
@@ -41,29 +42,31 @@ export const TextEditor = observer(
 
                 setLocations(next);
             });
-        }, []);
+        }, [text, locations]);
 
-        const stageChanges = useCallback((next: string[]) => {
-            if (last_timeout.current !== null) {
-                clearTimeout(last_timeout.current);
-                last_timeout.current = null;
-            }
+        const stageChanges = useCallback(
+            (next: string[]) => {
+                if (last_timeout.current !== null) {
+                    clearTimeout(last_timeout.current);
+                    last_timeout.current = null;
+                }
 
-            const diffs = diffCreate(text, next);
+                const diffs = diffCreate(text, next);
 
-            for (let [key, value] of diffs) {
-                staged_changes.current.set(key, value);
-            }
+                for (let [key, value] of diffs) {
+                    staged_changes.current.set(key, value);
+                }
 
-            last_timeout.current = setTimeout(() => {
-                socket.emit(name, Object.fromEntries(staged_changes.current.entries()));
-                console.log(staged_changes.current);
-                staged_changes.current.clear();
-                last_timeout.current = null;
-            }, 1000);
+                last_timeout.current = setTimeout(() => {
+                    socket.emit(name, Object.fromEntries(staged_changes.current.entries()));
+                    staged_changes.current.clear();
+                    last_timeout.current = null;
+                }, 1000);
 
-            return next;
-        }, []);
+                return next;
+            },
+            [text]
+        );
 
         const onScrollTextarea = useCallback(
             (e: React.UIEvent<HTMLTextAreaElement, UIEvent>) => {
@@ -91,11 +94,15 @@ export const TextEditor = observer(
             }
         }, []);
 
-        const onChangeTextarea = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-            const new_text = e.currentTarget.value.split("\n");
-            e.currentTarget.style.height = `${new_text.length * 1.25}em`;
-            stageChanges(new_text);
-        }, []);
+        const onChangeTextarea = useCallback(
+            (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                const new_text = e.currentTarget.value.split("\n");
+                e.currentTarget.style.height = `${new_text.length * 1.25}em`;
+                stageChanges(new_text);
+                setText(new_text);
+            },
+            [text]
+        );
 
         const onSelectTextarea = useCallback(
             (e: React.SyntheticEvent<HTMLTextAreaElement, Event>) => {
@@ -128,40 +135,18 @@ export const TextEditor = observer(
             socket.emit(`${name}_location`, []);
         }, []);
 
-        const renderLines = useCallback(() => {
-            const arr: React.ReactNode[] = [];
-            for (let [index, line] of text.entries()) {
-                const users = [];
-                const user_selection = [];
-                for (let [user, indexes] of locations) {
-                    if (indexes.has(index)) {
-                        user_selection.push(<div key={jsonKey({ index, user })} className={styles.odd_line} />);
-                        users.push(user);
-                    }
-                }
-                arr.push(
-                    <span key={jsonKey({ index: index + 1, users })}>
-                        {index + 1}
-                        {user_selection}
-                    </span>
-                );
-            }
-            return arr;
-        }, [text, locations]);
-
         return (
             <div className={styles.container} style={{ gridArea: name }} onClick={focusTextarea}>
                 {label !== undefined && <h2>{label}</h2>}
                 <div ref={code_editor} className={styles.code_editor}>
-                    <div ref={indexes} className={styles.line_indexes}>
-                        {renderLines()}
-                    </div>
+                    <Lines text_length={text.length} locations={locations} />
                     <textarea
+                        wrap="off"
                         spellCheck={false}
                         ref={textarea}
                         id={`${name}-text-editor`}
                         name={`${name}-text-editor`}
-                        defaultValue={text.join("\n")}
+                        // defaultValue={text.join("\n")}
                         value={text.join("\n")}
                         onSelect={onSelectTextarea}
                         onScroll={onScrollTextarea}

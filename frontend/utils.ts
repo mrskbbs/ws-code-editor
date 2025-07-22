@@ -7,7 +7,6 @@ export function diffCreate(prev: string[], next: string[]): Map<number, string |
     for (let i = 0; i < min_len; i++) {
         if (prev[i] !== next[i]) diffs.set(i, next[i]);
     }
-
     if (prev.length > next.length) {
         for (let i = min_len; i < prev.length; i++) diffs.set(i, null);
     }

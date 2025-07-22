@@ -25,7 +25,19 @@ export class RoomStore {
     }
 
     setStdin(val: string[]) {
-        this.code = val;
+        this.stdin = val;
+    }
+
+    setStderr(val: string[]) {
+        this.stderr = val;
+    }
+
+    setStdout(val: string[]) {
+        this.stdout = val;
+    }
+
+    setIsRunning(val: boolean) {
+        this.is_running = val;
     }
 
     setLocationsCode(val: Map<string, Set<number>>) {

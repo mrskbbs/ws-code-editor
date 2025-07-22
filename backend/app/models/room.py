@@ -85,7 +85,6 @@ class RoomDynamicModel():
             new_arr[ind] = diffs[key]
         
         cut_ind = len(new_arr) + 1
-
         for i in range(len(new_arr)-1):
             if new_arr[i] == None and new_arr[i+1] != None:
                 raise ValueError("NULL values must be followed by another NULL value or end of the list")
@@ -97,7 +96,7 @@ class RoomDynamicModel():
 
         if cut_ind != len(new_arr) + 1:
             new_arr = new_arr[:cut_ind]
-        
+        print(new_arr)
         return new_arr
     
     def setCode(self, diffs: dict[int, str | None]):
