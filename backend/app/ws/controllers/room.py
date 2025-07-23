@@ -70,10 +70,15 @@ class RoomWSController():
             disconnect()
             raise Exception("Room does not exist")
         
+        if not RoomService().isAllowedToEnter(uuid.UUID(self.user["id"]), self.room_id):
+            disconnect()
+            raise Exception("You are not allowed")
+
         if self.user["id"] in self.room.connections:
             disconnect()
             raise Exception("You are already present in this room from another device")
         
+
         join_room(room=str(self.room.id), sid=self.request.sid)
         self.room.connections.add(HashableAuthSessionInfo(self.user))
         emit("init", {
@@ -90,10 +95,11 @@ class RoomWSController():
         )
 
 
-    @injectDb
-    def disconnect(self, db: Session):
+    def disconnect(self):
+        print(list(self.room.connections), self.user)
         leave_room(room=str(self.room.id), sid=self.request.sid)
-        self.room.connections.remove(HashableAuthSessionInfo(self.user))
+        if HashableAuthSessionInfo(self.user) in self.room.connections:
+            self.room.connections.remove(HashableAuthSessionInfo(self.user))
 
         emit(
             "connections", 
@@ -102,20 +108,14 @@ class RoomWSController():
         )
 
         if len(self.room.connections) == 0:
-            try:
-                update(RoomModelNew).values(
-                    code="\n".join(self.room.code),
-                    stdin="\n".join(self.room.stdin),
-                ).where(
-                    id=self.room.id
+            self.rooms.pop(self.room_id, None)
+            try: 
+                RoomService().saveState(
+                    self.room_id, 
+                    self.room.code, 
+                    self.room.stdin
                 )
-                db.commit()
-                
-            except: 
-                logger.warning(f"Failed to save state for room #{self.room.id}")
-                db.rollback()
-
-            self.rooms.pop(self.room.id, None)
+            except: pass
 
     def setCode(self, diffs: dict[int, str | None]):
         try:

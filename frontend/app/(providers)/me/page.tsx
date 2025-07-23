@@ -18,7 +18,9 @@ function MePage() {
             ) : (
                 rooms.map((room) => (
                     <span key={room.id}>
-                        <a href={`/room/${room.id}`}></a>
+                        <a href={`/rooms/${room.id}`}>
+                            {room.name} {room.created_at}
+                        </a>
                     </span>
                 ))
             )}

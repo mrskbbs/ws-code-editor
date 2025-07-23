@@ -1,4 +1,5 @@
 from hashlib import sha256
+from venv import logger
 
 from sqlalchemy_serializer import SerializerMixin
 from app.config import CONTAINER_NAME, CONTAINER_USER, CONTAINER_WORKDIR, SALT
@@ -62,8 +63,10 @@ class RoomDynamicModel():
         self.invite_token = self.room_db.invite_token
         
         # Room props
-        self.code: list[str] = self.room_db.code.splitlines()
-        self.stdin: list[str] = self.room_db.stdin.splitlines()
+        db_code = self.room_db.code.splitlines()
+        db_stdin = self.room_db.stdin.splitlines()
+        self.code: list[str] = [""] if len(db_code) == 0 else db_code
+        self.stdin: list[str] = [""] if len(db_stdin) == 0 else db_stdin
         self.stdout: list[str] = list()
         self.stderr: list[str] = list()
         self.code_location: dict[uuid.UUID, list[int]] = dict()
@@ -72,42 +75,38 @@ class RoomDynamicModel():
         self.is_running: bool = False
 
     # Function to handle code/stdin changes
-    def __diffsHandler__(self, arr: list[str], diffs: dict[str, str | None]):
+    def __diffsHandler__(self, arr: list[str], diffs_obj: dict[str, str | None]):
+        diffs: dict[int, str] = dict()
+        for key, val in diffs_obj.items():
+            diffs[int(key)] = val
+            
+        diffs_len = max(diffs.keys())
         new_arr = arr.copy()
-        for key in diffs:
-            ind = int(key)
 
-            if diffs[key] == None and ind >= len(new_arr):
-                raise ValueError("NULL  values must be in range of the current list length")
-            
-            if ind >= len(new_arr):
-                new_arr.extend("" for _ in range(len(new_arr)-1, ind))
-            new_arr[ind] = diffs[key]
-        
+        if len(new_arr) < diffs_len:
+            for _ in range(len(new_arr) - 1, diffs_len):
+                new_arr.append("")
+
         cut_ind = len(new_arr) + 1
-        for i in range(len(new_arr)-1):
-            if new_arr[i] == None and new_arr[i+1] != None:
-                raise ValueError("NULL values must be followed by another NULL value or end of the list")
-            
-            if new_arr[i] == None:
-                cut_ind = min(cut_ind, i)
-            if new_arr[i+1] == None:
-                cut_ind = min(cut_ind, i+1)
 
-        if cut_ind != len(new_arr) + 1:
-            new_arr = new_arr[:cut_ind]
-        print(new_arr)
-        return new_arr
-    
+        for ind, val in diffs.items():
+            if val == None:
+                cut_ind = min(cut_ind, ind)
+            else:
+                new_arr[ind] = val
+
+        return new_arr[0:cut_ind]
+
     def setCode(self, diffs: dict[int, str | None]):
         if self.is_running:
             return
         
         if type(diffs) is not dict:
             raise TypeError("Invalid diff input")
-        
-        self.code = self.__diffsHandler__(self.code, diffs)
-
+        try:
+            self.code = self.__diffsHandler__(self.code, diffs)
+        except Exception as exc:
+            logger.error(exc)
     def setStdin(self, diffs: dict[int, str | None]): 
         if self.is_running:
             return
