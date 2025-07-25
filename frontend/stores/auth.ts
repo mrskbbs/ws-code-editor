@@ -13,24 +13,14 @@ class AuthStore {
         this.user = await getMyself();
     }
 
-    signup(data: ISignupData) {
-        signup(data)
-            .then(() => {
-                this.update();
-            })
-            .catch((err) => {
-                console.log("Failed to signup");
-            });
+    async signup(data: ISignupData) {
+        await signup(data);
+        this.update();
     }
 
-    login(data: ILoginData) {
-        login(data)
-            .then(() => {
-                this.update();
-            })
-            .catch((err) => {
-                console.log("Failed to signup");
-            });
+    async login(data: ILoginData) {
+        await login(data);
+        this.update();
     }
 }
 

@@ -1,11 +1,12 @@
 from datetime import datetime
 import json
 from flask import Request, Response, make_response
+from app.exceptions.base import HTTPBaseException
 from app.models.user import UserModelNew
 from app.services.auth import AuthService
 from app.types.auth import AuthSessionInfo
 from app.utils import injectUser, logger
-
+from app.exceptions import auth as auth_exc
 class AuthController():
     request: Request
     
@@ -35,6 +36,9 @@ class AuthController():
         
         if user == None:
             response.status = 403
+            response.data = json.dumps({
+                "message": auth_exc.LogoutRequired().message
+            })
             return response
         
         response.status = 200
@@ -47,14 +51,22 @@ class AuthController():
         response = make_response()
         try: 
             if self.auth_token:
-                raise Exception("You need to log out first")
+                raise auth_exc.LogoutRequired()
             
             token = AuthService().signup(self.body, self.request.user_agent.string)
             self.__addTokenCookie__(response, token)
             response.status = 201
+
+        except HTTPBaseException as exc:
+            response.status = exc.status_code
+            response.data = json.dumps({
+                "message": exc.message
+            })
+
         except Exception as exc:
             logger.error(exc)
             response.status = 500
+
         finally:
             return response
 
@@ -63,14 +75,23 @@ class AuthController():
         response = make_response()
         try: 
             if self.auth_token:
-                raise Exception("You need to log out first")
+                raise auth_exc.LogoutRequired()
 
             token = AuthService().login(self.body, self.request.user_agent.string)
             self.__addTokenCookie__(response, token)
             response.status = 201
+        
+        except HTTPBaseException as exc:
+            logger.error(exc)
+            response.status = exc.status_code
+            response.data = json.dumps({
+                "message": exc.message
+            })
+        
         except Exception as exc:
             logger.error(exc)
             response.status = 500
+        
         finally:
             return response
 
@@ -79,16 +100,21 @@ class AuthController():
         response = make_response()
         try: 
             if not self.auth_token:
-                raise KeyError("No authentication token provided")
+                raise auth_exc.InvalidToken()
 
             AuthService().logout(self.auth_token)
             self.__removeTokenCookie__(response)
             response.status = 200
-        except KeyError as exc:
-            logger.error(exc)
-            response.status = 400
+        
+        except HTTPBaseException as exc:
+            response.status = exc.status_code
+            response.data = json.dumps({
+                "message": exc.message
+            })
+        
         except Exception as exc:
-            print(exc)
+            logger.error(exc)
             response.status = 500
+        
         finally:
             return response

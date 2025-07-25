@@ -3,11 +3,13 @@ import uuid
 from flask import Request, make_response
 from app.db import injectDb
 from sqlalchemy.orm import Session
+from app.exceptions.base import HTTPBaseException
 from app.models.room import RoomModelNew
 from app.models.user import UserModelNew
 from app.services.room import RoomService
 from app.types.auth import AuthSessionInfo
 from app.utils import injectUser, logger
+from app.exceptions import room as room_exc
 
 class RoomController():
     def __init__(self, request: Request):
@@ -19,7 +21,7 @@ class RoomController():
     @injectDb   
     def __isRoomMember__(self, room_id: uuid.UUID, user_id: uuid.UUID, db: Session):
         user = db.get_one(UserModelNew, user_id)
-        return room_id in set(room.id for room in user.rooms)
+        return str(room_id) in set(str(room.id) for room in user.rooms)
     
 
     def __isRoomCreator__(self, room_id: uuid.UUID, user_id: uuid.UUID):
@@ -45,6 +47,13 @@ class RoomController():
                 )
             ) for room in rooms])
             response.status = 200
+        
+        except HTTPBaseException as exc:
+            logger.error(exc)
+            response.status = exc.status_code
+            response.data = json.dumps({
+                "message": exc.message
+            })
 
         except Exception as exc:
             logger.error(exc)
@@ -62,9 +71,19 @@ class RoomController():
             response.status = 201
             response.data = json.dumps({"id": str(room_id)})
 
+        except HTTPBaseException as exc:
+            logger.error(exc)
+            response.status = exc.status_code
+            response.data = json.dumps({
+                "message": exc.message
+            })
+
         except Exception as exc:
             logger.error(exc)
             response.status = 500
+            response.data = json.dumps({
+                "message": "Failed to create a room"
+            })
         
         finally:
             return response
@@ -75,16 +94,18 @@ class RoomController():
         response = make_response()
         try:
             if self.__isRoomMember__(room_id, uuid.UUID(user['id'])):
-                response.status = 400
-                return response
+                raise room_exc.AlreadyRoomMember()
             
             RoomService().acceptInvite(room_id, invite_token, uuid.UUID(user['id']))
 
             response.status = 200
         
-        except ValueError as exc:
+        except HTTPBaseException as exc:
             logger.error(exc)
-            response.status = 400
+            response.status = exc.status_code
+            response.data = json.dumps({
+                "message": exc.message
+            })
 
         except Exception as exc:
             logger.error(exc)
@@ -99,16 +120,25 @@ class RoomController():
         response = make_response()
         try:
             if not self.__isRoomCreator__(room_id, uuid.UUID(user['id'])):
-                response.status = 403
-                return response
+                raise room_exc.NotRoomCreator()
             
             RoomService().delete(room_id)
 
             response.status = 200
 
+        except HTTPBaseException as exc:
+            logger.error(exc)
+            response.status = exc.status_code
+            response.data = json.dumps({
+                "message": exc.message
+            })
+
         except Exception as exc:
             logger.error(exc)
             response.status = 500
+            response.data = json.dumps({
+                "message": "Failed to delete a room"
+            })
         
         finally:
             return response

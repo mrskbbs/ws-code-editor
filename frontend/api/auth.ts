@@ -7,7 +7,7 @@ export async function getMyself() {
         mode: FETCH_MODE,
         cache: "force-cache",
     });
-    if (!res.ok) throw Error("Failed to get credentials");
+    if (!res.ok) throw Error((await res.json()).message || "Failed to get credentials");
 
     return (await res.json()) as IUserData;
 }
@@ -23,7 +23,7 @@ export async function signup(data: ISignupData) {
         mode: FETCH_MODE,
     });
 
-    if (!res.ok) throw Error("Failed to create an account");
+    if (!res.ok) throw Error((await res.json()).message || "Failed to sign up");
 }
 
 export async function login(data: ILoginData) {
@@ -37,7 +37,7 @@ export async function login(data: ILoginData) {
         mode: FETCH_MODE,
     });
 
-    if (!res.ok) throw Error("Failed to log in");
+    if (!res.ok) throw Error((await res.json()).message || "Failed to log in");
 }
 
 export async function logout() {
@@ -47,5 +47,5 @@ export async function logout() {
         mode: FETCH_MODE,
     });
 
-    if (!res.ok) throw Error("Failed to log out");
+    if (!res.ok) throw Error((await res.json()).message || "Failed to log out");
 }

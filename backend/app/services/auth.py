@@ -9,7 +9,9 @@ from app.models.session import SessionModel
 from app.models.user import UserModelNew
 from app.types.auth import *
 from app.utils import sha256salt, unwrapForWhereClasue
-
+from app.exceptions import auth as auth_exc
+from sqlalchemy.exc import IntegrityError
+from app.utils import logger
 
 class AuthService():
     def __createToken__(self, id: uuid.UUID) -> str:
@@ -22,11 +24,11 @@ class AuthService():
 
     @injectDb
     def verifyToken(self, auth_token: str | None, db: Session) -> UserModelNew:
-        if not auth_token: raise ValueError("Invalid authentication token")
+        if not auth_token: raise auth_exc.InvalidToken()
 
         payload: AuthJWTPayload = jwt.decode(auth_token, JWT_KEY, [JWT_ALGO], reqiure=["iat"])
 
-        if not payload["id"]: raise ValueError("Invalid authentication token")
+        if not payload["id"]: raise auth_exc.InvalidToken()
 
         user = db.get_one(UserModelNew, payload["id"])
         return user
@@ -53,6 +55,11 @@ class AuthService():
 
             return auth_token
 
+        except IntegrityError as exc:
+            logger.error(exc)
+            db.rollback()
+            raise auth_exc.InvalidSyntaxCreds()
+
         except Exception as exc:
             db.rollback()
             raise exc
@@ -70,7 +77,7 @@ class AuthService():
                 ))
             ).first()
             
-            if not user: raise Exception("Invalid credentials")
+            if not user: raise auth_exc.InvalidCredentials()
 
             auth_token = self.__createToken__(user.id)
             session = SessionModel(

@@ -7,7 +7,7 @@ import { useCallback } from "react";
 export default function LoginPage() {
     const router = useRouter();
 
-    const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const form_data = new Map(new FormData(e.currentTarget).entries());
         const payload: any = {};
@@ -19,9 +19,13 @@ export default function LoginPage() {
 
             payload[key] = value.toString();
         }
-        auth_store.login(payload as ILoginData);
-        router.prefetch("/me");
-        router.push("/me");
+        try {
+            await auth_store.login(payload as ILoginData);
+            router.prefetch("/me");
+            router.push("/me");
+        } catch (err) {
+            if (err instanceof Error) console.error(err.message);
+        }
     }, []);
 
     return (

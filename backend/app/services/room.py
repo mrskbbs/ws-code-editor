@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlalchemy.orm.exc import NoResultFound
 import uuid
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.orm import Session, joinedload
@@ -9,12 +10,15 @@ from app.models.user import UserModelNew
 from app.types.room import RoomCreate
 from app.models.associations import association_user_room
 from app.utils import sha256salt, logger
+from app.exceptions import room as room_exc
 
 class RoomService():
     @injectDb
     def get(self, room_id: uuid.UUID, db: Session) -> RoomModelNew:
-        room = db.get_one(RoomModelNew, room_id)
-        return room
+        try:
+            return db.get_one(RoomModelNew, room_id)
+        except NoResultFound:
+            raise room_exc.RoomNotFound()
 
 
     @injectDb
@@ -56,13 +60,13 @@ class RoomService():
     
     
     @injectDb
-    def acceptInviteToken(self, room_id: uuid.UUID, invite_token: str, user_id: uuid.UUID, db: Session):
+    def acceptInvite(self, room_id: uuid.UUID, invite_token: str, user_id: uuid.UUID, db: Session):
         try:
             room = db.get_one(RoomModelNew, room_id)
     
             if room.invite_token != invite_token:
                 raise ValueError("Invalid invitation token")
-    
+
             db.execute(
                 insert(association_user_room)
                 .values(
@@ -73,6 +77,10 @@ class RoomService():
 
             db.commit()
 
+        except NoResultFound:
+            db.rollback()
+            raise room_exc.RoomNotFound()
+
         except Exception as exc:
             db.rollback()
             raise exc
@@ -81,9 +89,11 @@ class RoomService():
     @injectDb
     def delete(self, room_id: uuid.UUID, db: Session):
         try:
-            db.execute(
-                delete(RoomModelNew).where(id=room_id)
+            res = db.execute(
+                delete(RoomModelNew).where(RoomModelNew.id==room_id)
             )
+            if res.rowcount != 1:
+                raise Exception("Incorrect amount of rows were changed")
             db.commit()
 
         except Exception as exc:
@@ -102,12 +112,13 @@ class RoomService():
                     stdin="\n".join(stdin),
                 )
             )
+            
             db.commit()
         except Exception as exc: 
             logger.error(exc)
             logger.warning(f"Failed to save state for room #{self.room.id}")
             db.rollback()
-            raise exc
+            raise room_exc.RoomStateNotSaved()
         
 
     @injectDb

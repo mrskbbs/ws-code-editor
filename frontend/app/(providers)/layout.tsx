@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthCheck } from "@/components/AuthCheck/AuthCheck";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 
