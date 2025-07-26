@@ -1,17 +1,16 @@
 "use client";
 
 import { AuthCheck } from "@/components/AuthCheck/AuthCheck";
+import { RoomContextProvider } from "@/components/RoomContext";
 import { RoomStore } from "@/stores/room";
 import { useParams } from "next/navigation";
 import React, { createContext } from "react";
 
-export const RoomContext = createContext<RoomStore>(new RoomStore());
-
 export default function RoomLayout({ children }: { children: React.ReactNode }) {
     const room = new RoomStore();
     return (
-        <RoomContext.Provider value={room}>
+        <RoomContextProvider value={room}>
             <AuthCheck>{children}</AuthCheck>
-        </RoomContext.Provider>
+        </RoomContextProvider>
     );
 }

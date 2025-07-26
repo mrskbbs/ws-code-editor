@@ -1,6 +1,7 @@
 import { useState } from "react";
 import styles from "./Connections.module.css";
 import { observer } from "mobx-react-lite";
+import { stringToColor } from "@/utils";
 export const Connections = observer(({ connections }: { connections: IUserData[] }) => {
     const [is_open, setIsOpen] = useState(() => false);
     const SLICE_NUM = 5;
@@ -9,7 +10,11 @@ export const Connections = observer(({ connections }: { connections: IUserData[]
             <p>Connections:</p>
             <div className={styles.conns}>
                 {connections.slice(0, SLICE_NUM).map((conn) => (
-                    <span key={conn.id} className={styles.user_circle}>
+                    <span
+                        key={conn.id}
+                        className={styles.user_circle}
+                        style={{ backgroundColor: stringToColor(conn.id) }}
+                    >
                         <p>{conn.username}</p>
                     </span>
                 ))}

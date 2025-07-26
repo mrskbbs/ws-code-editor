@@ -1,6 +1,16 @@
 export function jsonKey(params: any) {
     return JSON.stringify(params);
 }
+
+export function stringToColor(value: string) {
+    let hash = 0;
+    for (let i = 0; i < value.length; i++) {
+        hash = value.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    return `hsl(${hash % 360}, 45%, 65%)`;
+}
+
 export function diffCreate(prev: string[], next: string[]): Map<number, string | null> {
     const diffs = new Map<number, string | null>();
     let min_len = prev.length > next.length ? next.length : prev.length;

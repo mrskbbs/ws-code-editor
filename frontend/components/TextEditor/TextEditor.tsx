@@ -1,29 +1,47 @@
 import { io } from "socket.io-client";
 import styles from "./TextEditor.module.css";
 import { diffApply, diffCreate, jsonKey } from "@/utils";
-import React, { Dispatch, RefObject, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import React, { Dispatch, memo, RefObject, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { auth_store } from "@/stores/auth";
-import { Lines } from "./Lines/Lines";
+import { Indexes } from "./Lines/Lines";
+import { Selections } from "./Lines/Selections";
+interface ITextEditor {
+    label?: string;
+    name: string;
+    text: string[];
+    locations: Map<string, Set<number>>;
+    setLocations: (val: Map<string, Set<number>>) => void;
+    setText: (val: string[]) => void;
+    socket: ReturnType<typeof io>;
+}
+
 // Input socket + useState ???
-export const TextEditor = observer(
-    ({
-        label,
-        name,
-        text,
-        setText,
-        locations,
-        setLocations,
-        socket,
-    }: {
-        label?: string;
-        name: string;
-        text: string[];
-        locations: Map<string, Set<number>>;
-        setLocations: (val: Map<string, Set<number>>) => void;
-        setText: (val: string[]) => void;
-        socket: ReturnType<typeof io>;
-    }) => {
+function areEqual(prev: ITextEditor, next: ITextEditor) {
+    let text = true;
+    let locations = true;
+
+    if (prev.locations.size !== next.locations.size) {
+        return false;
+    } else {
+        for (let [key, value] of prev.locations) {
+            if (!next.locations.has(key)) locations = false;
+            if (next.locations.get(key) !== value) locations = false;
+        }
+    }
+
+    if (prev.text.length !== next.text.length) {
+        return false;
+    } else {
+        prev.text.forEach((val, ind) => {
+            if (next.text[ind] !== val) text = false;
+        });
+    }
+
+    return text && locations;
+}
+export const TextEditor = memo(
+    observer(({ label, name, text, setText, locations, setLocations, socket }: ITextEditor) => {
         const staged_changes = useRef(new Map<number, string | null>());
         const last_timeout = useRef(null as ReturnType<typeof setTimeout> | null);
 
@@ -112,13 +130,20 @@ export const TextEditor = observer(
                 let ind = 0;
                 let i = 0;
                 for (let line of text) {
-                    const ind_end = ind + line.length + 1;
+                    const new_line_increment = text.length - 1 === i ? 0 : 1;
+                    const ind_end = ind + line.length + new_line_increment;
+
                     if (ind <= sel_start && sel_start < ind_end) indexes.add(i);
-                    if (sel_start < ind && sel_end > ind_end) indexes.add(i);
                     if (ind <= sel_end && sel_end < ind_end) indexes.add(i);
+                    if (sel_start <= ind && ind_end <= sel_end) indexes.add(i);
+                    if (ind <= sel_start && sel_end < ind_end) indexes.add(i);
+
+                    if (i === text.length - 1 && (sel_start === ind_end || sel_end === ind_end)) indexes.add(i);
+
                     ind += line.length + 1;
                     i++;
                 }
+                console.log(indexes.values());
                 socket.emit(`${name}_location`, [...indexes.values()]);
             },
             [text]
@@ -139,8 +164,10 @@ export const TextEditor = observer(
             <div className={styles.container} style={{ gridArea: name }} onClick={focusTextarea}>
                 {label !== undefined && <h2>{label}</h2>}
                 <div ref={code_editor} className={styles.code_editor}>
-                    <Lines text_length={text.length} locations={locations} />
+                    <Indexes text_length={text.length} />
+                    {locations && <Selections text_length={text.length} locations={locations} />}
                     <textarea
+                        style={{ height: `${text.length * 1.25}em` }}
                         wrap="off"
                         spellCheck={false}
                         ref={textarea}
@@ -158,5 +185,6 @@ export const TextEditor = observer(
                 </div>
             </div>
         );
-    }
+    }),
+    areEqual
 );

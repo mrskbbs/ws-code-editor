@@ -16,17 +16,17 @@ function Home() {
             </p>
             <hr />
             <div>
-                <AuthCheck>
-                    {auth_store.user === null ? (
+                <AuthCheck
+                    fallback={
                         <p>
-                            In order to use this app you need to <a href="/auth/login">log in</a> or{" "}
+                            In order to use this app you need to <a href="/auth/login">log in</a> or
                             <a href="/auth/signup">create an account</a> first
                         </p>
-                    ) : (
-                        <p>
-                            Now that you're logged in you can <a href="/me">go to your page</a>
-                        </p>
-                    )}
+                    }
+                >
+                    <p>
+                        Now that you're logged in you can <a href="/me">go to your page</a>
+                    </p>
                 </AuthCheck>
             </div>
         </div>

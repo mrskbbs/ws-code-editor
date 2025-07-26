@@ -5,20 +5,45 @@
     position: relative;
 }
 .code_editor {
+    position: relative;
     overflow: auto;
     height: 100%;
     width: 100%;
     display: flex;
     flex-direction: row;
 }
-.code_editor > .line_indexes {
+.line_indexes {
     margin-right: 1em;
     display: flex;
     flex-direction: column;
 }
-.code_editor > .line_indexes > * {
+.line_selections {
+    opacity: 0.1;
+    user-select: none;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    margin-right: 1em;
+    display: flex;
+    flex-direction: column;
+}
+.line_indexes > * {
     margin: 0em;
     padding: 0em;
+    display: flex;
+    align-items: end;
+    justify-content: start;
+    height: 1.25em;
+    font-family: "SourceCodePro";
+    font-size: 1.05em;
+    position: relative;
+}
+.line_selections > * {
+    margin: 0em;
+    padding: 0em;
+    user-select: none;
+    pointer-events: none;
     display: flex;
     align-items: end;
     justify-content: start;
@@ -30,16 +55,15 @@
 .odd_line {
     position: absolute;
     top: 0em;
-    user-select: none;
-    pointer-events: none;
     display: block;
-    height: 100%;
-    width: 100vw;
-    background-color: rgba(140, 132, 255, 0.1);
+    height: 1.26em;
+    width: 100%;
+    background-color: rgb(140, 132, 255);
 }
 .code_editor > textarea {
     font-family: "SourceCodePro";
     width: 100%;
+    /* height: 100%; */
     font-size: 1.05em;
     line-height: 1.25em;
     margin-inline: 0em;

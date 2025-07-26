@@ -3,10 +3,9 @@
 import { TextEditor } from "@/components/TextEditor/TextEditor";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./page.module.css";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useWS } from "@/hooks/useWS";
-import { diffApply } from "@/utils";
-import { createPortal } from "react-dom";
+import { diffApply, jsonKey } from "@/utils";
 import { Connections } from "@/components/Connections/Connections";
 import { ErrorPopups } from "@/components/ErrorPopups/ErrorPopups";
 import { TextStatic } from "@/components/TextStatic/TextStatic";
@@ -15,7 +14,7 @@ import PlaySVG from "@/public/svg/play.svg";
 import ClockSVG from "@/public/svg/clock.svg";
 import CopySVG from "@/public/svg/copy.svg";
 import { ConnectingSpinner } from "@/components/ConnectingSpinner/ConnectingSpinner";
-import { RoomContext } from "./layout";
+import { RoomContext } from "@/components/RoomContext";
 import { observer } from "mobx-react-lite";
 import { BACKEND_URL, FRONTEND_URL } from "@/config";
 
@@ -34,7 +33,7 @@ function RoomPage() {
         // Init data
         socket.current?.on("init", (data) => {
             room.name = data.name;
-            room.invite_token = `${FRONTEND_URL}/room/${room_id}/invite/${data.invite_token}`;
+            room.invite_token = `${FRONTEND_URL}/invite?room_id=${room_id}&invite_token=${data.invite_token}`;
         });
         socket.current?.on("connections", (data) => {
             room.connections = data;
@@ -63,7 +62,7 @@ function RoomPage() {
 
     const leaveRoom = useCallback(() => {
         socket.current?.disconnect();
-        router.push("/");
+        router.push("/me");
     }, [socket]);
 
     if (!is_connected && !is_disconnected) {
@@ -96,7 +95,8 @@ function RoomPage() {
                             className={`icon_button ${styles.copy_button}`}
                             onClick={() => navigator.clipboard.writeText(room.invite_token)}
                         >
-                            <span>Copy room code</span> <CopySVG />
+                            <CopySVG />
+                            <span>Copy room code</span>
                         </button>
                         <Connections connections={room.connections} />
                     </div>
@@ -124,7 +124,6 @@ function RoomPage() {
                     </div>
                 </header>
                 <TextEditor
-                    key={"code"}
                     label="Code editor"
                     name="code"
                     text={room.code}
@@ -134,7 +133,6 @@ function RoomPage() {
                     socket={socket.current}
                 />
                 <TextEditor
-                    key={"stdin"}
                     label="Input"
                     name="stdin"
                     text={room.stdin}
