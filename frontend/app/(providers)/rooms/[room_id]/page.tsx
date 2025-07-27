@@ -29,7 +29,6 @@ function RoomPage() {
     });
 
     useEffect(() => {
-        console.log(room);
         // Init data
         socket.current?.on("init", (data) => {
             room.name = data.name;
@@ -85,8 +84,8 @@ function RoomPage() {
     return (
         <>
             <ErrorPopups text={room.stderr} />
-            <main className={styles.main_layout}>
-                <header style={{ gridArea: "header" }}>
+            <main className={styles.container}>
+                <header>
                     <div>
                         <h1>
                             <span className={styles.sp_weight}>Room {room.name}</span>
@@ -123,25 +122,27 @@ function RoomPage() {
                         </button>
                     </div>
                 </header>
-                <TextEditor
-                    label="Code editor"
-                    name="code"
-                    text={room.code}
-                    setText={(val) => room.setCode(val)}
-                    locations={room.locations_code}
-                    setLocations={(val) => room.setLocationsCode(val)}
-                    socket={socket.current}
-                />
-                <TextEditor
-                    label="Input"
-                    name="stdin"
-                    text={room.stdin}
-                    setText={(val) => room.setStdin(val)}
-                    locations={room.locations_stdin}
-                    setLocations={(val) => room.setLocationsStdin(val)}
-                    socket={socket.current}
-                />
-                <TextStatic label="Output" style={{ gridArea: "stdout" }} text={room.stdout} />
+                <div className={styles.editor_layout}>
+                    <TextEditor
+                        label="Code editor"
+                        name="code"
+                        text={room.code}
+                        setText={(val) => room.setCode(val)}
+                        locations={room.locations_code}
+                        setLocations={(val) => room.setLocationsCode(val)}
+                        socket={socket.current}
+                    />
+                    <TextEditor
+                        label="Input"
+                        name="stdin"
+                        text={room.stdin}
+                        setText={(val) => room.setStdin(val)}
+                        locations={room.locations_stdin}
+                        setLocations={(val) => room.setLocationsStdin(val)}
+                        socket={socket.current}
+                    />
+                    <TextStatic label="Output" style={{ gridArea: "stdout" }} text={room.stdout} />
+                </div>
             </main>
         </>
     );

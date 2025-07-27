@@ -1,8 +1,9 @@
 import { HTMLProps, memo } from "react";
 import styles from "./TextStatic.module.css";
-import { Line } from "../Line/Line";
 import CopySVG from "../../public/svg/copy.svg";
 import { observer } from "mobx-react-lite";
+import { Line } from "./Line/Line";
+import { jsonKey } from "@/utils";
 
 interface ITextStatic extends HTMLProps<HTMLDivElement> {
     text: string[];
@@ -28,9 +29,7 @@ export const TextStatic = memo(
                 )}
                 <div className={styles.lines_container}>
                     {text.map((line, index) => (
-                        <p key={`${index}${line}`} className={index % 2 == 0 ? styles.evenline : styles.oddline}>
-                            {line}
-                        </p>
+                        <Line key={jsonKey({ line, index })} line={line} index={index} />
                     ))}
                 </div>
             </div>

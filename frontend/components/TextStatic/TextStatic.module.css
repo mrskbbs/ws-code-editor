@@ -14,13 +14,7 @@
     margin-bottom: 0.15em;
     top: -2.75em;
     left: 0.15em;
-    background-color: var(--background);
-}
-.evenline {
-    background-color: var(--background);
-}
-.oddline {
-    background-color: color-mix(in srgb, var(--background), white 5%);
+    background-color: rgba(255, 255, 255, 2%);
 }
 .lines_container {
     display: flex;
@@ -28,8 +22,8 @@
     overflow-y: scroll;
     height: 100%;
     flex-direction: column;
-    border: var(--foreground) solid 0.1em;
-    border-radius: 0.5em;
+    border: var(--border-highlight);
+    border-radius: 0.75em;
     padding: 1em;
 }
 .lines_container > p {

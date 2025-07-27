@@ -51,7 +51,6 @@ export function diffApply(arr: string[], diffs_obj: { [key: number]: string | nu
             new_arr[ind] = val;
         }
     }
-    console.log(new_arr.slice(0, cut_ind));
     return new_arr.slice(0, cut_ind);
     // for (let [key, value] of Object.entries(diffs_obj)) {
     //     diffs.set(Number(key), value);

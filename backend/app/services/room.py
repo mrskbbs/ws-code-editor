@@ -26,7 +26,7 @@ class RoomService():
         rooms = (
             db.query(RoomModelNew)
             .options(joinedload(RoomModelNew.creator), joinedload(RoomModelNew.users))
-            .filter(association_user_room.c.user_id_fk == user_id)
+            .where(association_user_room.c.user_id_fk == user_id)
             .all()
         )
         return rooms

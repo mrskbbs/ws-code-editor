@@ -9,8 +9,15 @@
 }
 
 :root {
-    --background: #0d0f10;
+    --dark: hsl(225, 13%, 7%);
+    --dark1: #121419;
+    --dark2: #191c22;
+    --dark3: #272b35;
+    --dark4: #383e4c;
+    --background: var(--dark1);
     --foreground: #ffffff;
+    --color-transition: 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+    --border-highlight: var(--dark3) 0.125em solid;
     --fg1: #c3c3c4;
     --fg2: #a5a5a6;
     --fg3: #868788;
@@ -21,12 +28,6 @@
 :root::selection {
     color: var(--background);
     background-color: var(--violet);
-}
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #0d0f10;
-        --foreground: #ffffff;
-    }
 }
 
 html,
@@ -45,7 +46,8 @@ body {
     flex-direction: column;
 }
 footer {
-    background-color: color-mix(in srgb, var(--background), black 25%);
+    border-top: var(--border-highlight);
+    /* background-color: var(--dark); */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -181,10 +183,11 @@ svg {
 }
 
 input {
+    background-color: rgba(255, 255, 255, 1.5%);
     color: var(--foreground);
     height: 100%;
     min-height: 3em;
-    border: solid var(--foreground) 0.1em;
+    border: var(--border-highlight);
     border-radius: 0.5em;
     font-family: "Montserrat";
     font-weight: 400;

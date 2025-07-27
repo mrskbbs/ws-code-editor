@@ -12,7 +12,6 @@ export async function getMyRooms() {
 }
 
 export async function createRoom(data: IRoomCreateData) {
-    console.log(data);
     const res = await fetch(`${BACKEND_URL}/rooms/`, {
         method: "POST",
         credentials: "include",
