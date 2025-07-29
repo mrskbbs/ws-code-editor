@@ -1,4 +1,4 @@
-import { getMyself, login, signup } from "@/api/auth";
+import { getMyself, login, logout, signup } from "@/api/auth";
 import { computed, makeAutoObservable } from "mobx";
 
 class AuthStore {
@@ -20,6 +20,11 @@ class AuthStore {
 
     async login(data: ILoginData) {
         await login(data);
+        this.update();
+    }
+
+    async logout() {
+        await logout();
         this.update();
     }
 }

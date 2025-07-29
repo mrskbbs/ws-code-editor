@@ -12,11 +12,12 @@
     --dark: hsl(225, 13%, 7%);
     --dark1: #121419;
     --dark2: #191c22;
-    --dark3: #272b35;
+    --dark3: hsl(223, 15%, 15%);
     --dark4: #383e4c;
     --background: var(--dark1);
     --foreground: #ffffff;
     --color-transition: 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+    --scale-transition: 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
     --border-highlight: var(--dark3) 0.125em solid;
     --fg1: #c3c3c4;
     --fg2: #a5a5a6;
@@ -42,12 +43,13 @@ body {
     padding: 0em;
 }
 body {
+    position: relative;
     display: flex;
     flex-direction: column;
 }
 footer {
     border-top: var(--border-highlight);
-    /* background-color: var(--dark); */
+    background-color: rgba(0, 0, 0, 20%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -98,6 +100,7 @@ button {
     background: none;
     border: none;
     border-radius: none;
+    transition: var(--scale-transition);
 }
 button:active {
     scale: 0.9;

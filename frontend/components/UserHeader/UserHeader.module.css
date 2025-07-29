@@ -1,0 +1,28 @@
+.user_header {
+    background-color: rgba(0, 0, 0, 20%);
+    padding: 1em;
+    height: min-content;
+    border-bottom: var(--border-highlight);
+    display: grid;
+    grid-template:
+        "av un lg"
+        "av id lg";
+    column-gap: 1.5em;
+    grid-template-columns: min-content max-content max-content;
+    grid-template-rows: repeat(3, min-content);
+    align-items: end;
+    justify-items: start;
+}
+.user_header > h2 {
+    margin: 0em !important;
+}
+.user_header > .user_id {
+    color: color-mix(in srgb, var(--foreground), rgba(0, 0, 0, 0) 70%);
+}
+.logout {
+    grid-area: lg;
+    align-self: center;
+}
+.logout > svg:hover {
+    fill: var(--red);
+}

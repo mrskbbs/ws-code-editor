@@ -1,0 +1,10 @@
+.rooms {
+    height: 100%;
+    margin-right: 5em;
+    margin-left: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    overflow-x: hidden;
+    overflow-y: auto;
+}

@@ -1,0 +1,33 @@
+.container_modal {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    z-index: 5;
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(5px);
+}
+.container_modal > div {
+    display: flex;
+    width: 40%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: end;
+    padding: 2em;
+    gap: 1em;
+    background-color: var(--dark);
+    border-radius: 1em;
+    border: var(--border-highlight);
+}
+.container_modal > * > form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+.close > svg:hover {
+    fill: var(--red);
+}

@@ -44,5 +44,5 @@ export async function acceptInvite(id: string, token: string) {
         mode: FETCH_MODE,
     });
 
-    if (!res.ok) throw Error("Failed to accept an invite");
+    if (!res.ok) throw Error(((await res.json()).message as string) || "Failed to accept an invite");
 }

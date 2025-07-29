@@ -1,8 +1,9 @@
 from datetime import datetime
+import time
 from sqlalchemy.orm.exc import NoResultFound
 import uuid
-from sqlalchemy import delete, insert, select, update
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import delete, desc, insert, select, update
+from sqlalchemy.orm import Session, joinedload, selectinload
 from app.config import TIME_FORMAT
 from app.db import injectDb
 from app.models.room import RoomModelNew
@@ -23,12 +24,21 @@ class RoomService():
 
     @injectDb
     def getMy(self, user_id: uuid.UUID, db: Session) -> list[RoomModelNew]:
-        rooms = (
-            db.query(RoomModelNew)
-            .options(joinedload(RoomModelNew.creator), joinedload(RoomModelNew.users))
+        time.sleep(10)
+        rooms = db.execute(
+            select(RoomModelNew)
+            .join(
+                association_user_room, 
+                association_user_room.c.room_id_fk == RoomModelNew.id
+            )
+            .options(
+                joinedload(RoomModelNew.creator),
+                selectinload(RoomModelNew.users),
+            )
             .where(association_user_room.c.user_id_fk == user_id)
-            .all()
-        )
+            .order_by(desc(RoomModelNew.created_at))
+        ).scalars().all()
+
         return rooms
 
 

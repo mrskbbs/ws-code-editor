@@ -8,34 +8,11 @@
     flex-direction: row;
     align-items: center;
     gap: 0.5em;
-    height: 3em;
-    max-width: 20em;
-}
-.user_circle {
-    position: relative;
-    aspect-ratio: 1/1;
-    border-radius: 50%;
     height: 2em;
-    background-color: var(--violet);
+    max-width: 20em;
+    padding: 0.5em;
 }
-.user_circle > p {
-    pointer-events: none;
-    opacity: 0;
-    z-index: 2;
-    user-select: none;
-    font-size: 0.75em;
-    position: absolute;
-    bottom: -100%;
-    padding: 1em;
-    color: var(--foreground);
-    background-color: var(--background);
-    border: solid var(--violet) 0.1em;
-    border-radius: 0.5em;
-    transition: 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
-}
-.user_circle:hover > p {
-    opacity: 1;
-}
+
 .hidden_users {
     position: absolute;
     z-index: 3;

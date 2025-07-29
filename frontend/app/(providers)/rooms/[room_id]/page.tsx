@@ -13,7 +13,8 @@ import LeaveSVG from "@/public/svg/leave.svg";
 import PlaySVG from "@/public/svg/play.svg";
 import ClockSVG from "@/public/svg/clock.svg";
 import CopySVG from "@/public/svg/copy.svg";
-import { ConnectingSpinner } from "@/components/ConnectingSpinner/ConnectingSpinner";
+import LinkSVG from "@/public/svg/link.svg";
+import { Spinner } from "@/components/Spinner/Spinner";
 import { RoomContext } from "@/components/RoomContext";
 import { observer } from "mobx-react-lite";
 import { BACKEND_URL, FRONTEND_URL } from "@/config";
@@ -65,7 +66,7 @@ function RoomPage() {
     }, [socket]);
 
     if (!is_connected && !is_disconnected) {
-        return <ConnectingSpinner />;
+        return <Spinner text="Connecting" />;
     }
     if (is_disconnected) {
         return (
@@ -94,8 +95,8 @@ function RoomPage() {
                             className={`icon_button ${styles.copy_button}`}
                             onClick={() => navigator.clipboard.writeText(room.invite_token)}
                         >
-                            <CopySVG />
-                            <span>Copy room code</span>
+                            <LinkSVG />
+                            <span>Copy invite link</span>
                         </button>
                         <Connections connections={room.connections} />
                     </div>

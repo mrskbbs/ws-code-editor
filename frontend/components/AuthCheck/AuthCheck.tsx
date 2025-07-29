@@ -2,6 +2,7 @@
 import { auth_store } from "@/stores/auth";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
+import { Spinner } from "../Spinner/Spinner";
 
 const DefaultFallback = () => {
     return (
@@ -34,7 +35,7 @@ export const AuthCheck = observer(
         }, []);
 
         if (is_loading) {
-            return <p>Loading...</p>;
+            return <Spinner text="Loading" />;
         }
         if (is_error) {
             if (fallback === undefined) return <DefaultFallback />;
