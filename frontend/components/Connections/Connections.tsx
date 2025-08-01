@@ -3,7 +3,12 @@ import styles from "./Connections.module.css";
 import { observer } from "mobx-react-lite";
 import { stringToColor } from "@/utils";
 import { ProfilePic } from "../ProfilePic/ProfilePic";
-export const Connections = observer(({ connections }: { connections: IUserData[] }) => {
+
+interface ICConnections {
+    connections: IUserData[];
+}
+
+export const Connections = observer(({ connections }: ICConnections) => {
     const [is_open, setIsOpen] = useState(() => false);
     const USER_MAX_DISPLAY = 5;
     return (

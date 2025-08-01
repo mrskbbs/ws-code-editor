@@ -43,7 +43,11 @@ def createContainer(container):
 # Main logic
 try:
     container = docker_client.containers.get(CONTAINER_NAME)
-    container.start()
+    
+    if container.status == "running":
+        container.restart()
+    else:
+        container.start()
 
 except docker.errors.NotFound:
     logger.warning("Container not found, creating a new one")
@@ -55,5 +59,5 @@ except docker.errors.DockerException as exc:
     sys.exit(1)
 
 finally:
-    atexit.register(lambda: container.stop())
+    atexit.register(lambda: container.kill())
 

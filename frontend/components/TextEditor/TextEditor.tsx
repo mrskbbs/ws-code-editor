@@ -6,7 +6,7 @@ import { observer } from "mobx-react-lite";
 import { auth_store } from "@/stores/auth";
 import { Selections } from "./Selections/Selections";
 import { Indexes } from "./Indexes/Indexes";
-interface ITextEditor {
+interface ICTextEditor {
     label?: string;
     name: string;
     text: string[];
@@ -16,8 +16,7 @@ interface ITextEditor {
     socket: ReturnType<typeof io>;
 }
 
-// Input socket + useState ???
-function areEqual(prev: ITextEditor, next: ITextEditor) {
+function areEqual(prev: ICTextEditor, next: ICTextEditor) {
     let text = true;
     let locations = true;
 
@@ -41,8 +40,9 @@ function areEqual(prev: ITextEditor, next: ITextEditor) {
     return text && locations;
 }
 export const TextEditor = memo(
-    observer(({ label, name, text, setText, locations, setLocations, socket }: ITextEditor) => {
+    observer(({ label, name, text, setText, locations, setLocations, socket }: ICTextEditor) => {
         const staged_changes = useRef(new Map<number, string | null>());
+        const STAGING_TIMEOUT = 0;
         const last_timeout = useRef(null as ReturnType<typeof setTimeout> | null);
         const scroll_ref = useRef(null) as RefObject<HTMLDivElement | null>;
         const textarea_container = useRef(null) as RefObject<HTMLDivElement | null>;
@@ -63,6 +63,14 @@ export const TextEditor = memo(
             });
         }, [text, locations]);
 
+        useEffect(() => {
+            if (textarea.current) {
+                textarea.current.cols = Math.max(...text.map((v) => v.length));
+                textarea.current.rows = text.length;
+                textarea.current.style.height = `${(text.length + 1) * 1.25}em`;
+            }
+        }, [textarea, text]);
+
         const stageChanges = useCallback(
             (next: string[]) => {
                 if (last_timeout.current !== null) {
@@ -80,7 +88,7 @@ export const TextEditor = memo(
                     socket.emit(name, Object.fromEntries(staged_changes.current.entries()));
                     staged_changes.current.clear();
                     last_timeout.current = null;
-                }, 1000);
+                }, STAGING_TIMEOUT);
 
                 return next;
             },
@@ -102,6 +110,7 @@ export const TextEditor = memo(
                 const start = e.currentTarget.selectionStart;
                 const end = e.currentTarget.selectionEnd;
                 e.currentTarget.value = val.slice(0, start) + "\t" + val.slice(end, val.length);
+                e.currentTarget.setSelectionRange(start + 1, end + 1);
                 stageChanges(e.currentTarget.value.split("\n"));
             }
         }, []);
@@ -195,7 +204,9 @@ export const TextEditor = memo(
                     <div className={styles.fake_scroll} ref={scroll_ref} onScroll={onScrollFakeScroll}>
                         <div
                             className={styles.scroll_content}
-                            style={{ width: `${0.65 * Math.max(...text.map((v) => v.length))}em` }}
+                            style={{
+                                width: `${0.65 * Math.max(...text.map((v) => v.length))}em`,
+                            }}
                         ></div>
                     </div>
                 </div>

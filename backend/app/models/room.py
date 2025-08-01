@@ -82,12 +82,14 @@ class RoomDynamicModel():
             
         diffs_len = max(diffs.keys())
         new_arr = arr.copy()
+        lnarr = len(arr)
 
-        if len(new_arr) < diffs_len:
-            for _ in range(len(new_arr) - 1, diffs_len):
+        if lnarr < diffs_len + 1:
+            for _ in range(lnarr, diffs_len+1):
+                print("aa")
                 new_arr.append("")
-
         cut_ind = len(new_arr) + 1
+        print(new_arr, diffs_obj, lnarr, cut_ind+1)
 
         for ind, val in diffs.items():
             if val == None:

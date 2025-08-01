@@ -1,8 +1,8 @@
 import { createRoom } from "@/api/room";
+import { ErrorDisplay } from "@/components/ErrorDisplay/ErrorDisplay";
+import { ModalWrapperContext } from "@/components/ModalWrapper/ModalWrapper";
 import { useRouter } from "next/navigation";
 import { useContext } from "react";
-import { ModalWrapperContext } from "../ModalWrapper/ModalWrapper";
-import { ErrorDisplay } from "../ErrorDisplay/ErrorDisplay";
 
 export const RoomCreateForm = () => {
     const router = useRouter();

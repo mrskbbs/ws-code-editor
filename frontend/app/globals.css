@@ -33,6 +33,7 @@
 
 html,
 body {
+    scrollbar-color: var(--dark4) rgba(0, 0, 0, 0);
     color: var(--foreground);
     background-color: var(--background);
     font-family: "Montserrat";

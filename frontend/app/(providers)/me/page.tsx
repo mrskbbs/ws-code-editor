@@ -9,7 +9,7 @@ import AddBoxSVG from "@/public/svg/addbox.svg";
 import { RoomsList } from "@/components/RoomsList/RoomsList";
 import { Spinner } from "@/components/Spinner/Spinner";
 import { UserHeader } from "@/components/UserHeader/UserHeader";
-import { RoomCreateForm } from "@/components/RoomCreateForm/RoomCreateForm";
+import { RoomCreateForm } from "@/forms/RoomCreateForm/RoomCreateForm";
 import { ModalWrapper } from "@/components/ModalWrapper/ModalWrapper";
 import { useModal } from "@/hooks/useModal";
 

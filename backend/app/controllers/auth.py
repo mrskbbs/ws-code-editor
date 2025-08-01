@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-from flask import Request, Response, make_response
+from flask import Request, Response, make_response, session
 from app.exceptions.base import HTTPBaseException
 from app.models.user import UserModelNew
 from app.services.auth import AuthService
@@ -35,9 +35,10 @@ class AuthController():
         response = make_response()
         
         if user == None:
-            response.status = 403
+            exc = auth_exc.InvalidToken()
+            response.status = exc.status_code
             response.data = json.dumps({
-                "message": auth_exc.LogoutRequired().message
+                "message": exc.message
             })
             return response
         
@@ -104,6 +105,7 @@ class AuthController():
 
             AuthService().logout(self.auth_token)
             self.__removeTokenCookie__(response)
+            session.clear()
             response.status = 200
         
         except HTTPBaseException as exc:

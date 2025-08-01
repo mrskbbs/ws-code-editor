@@ -1,5 +1,4 @@
 from datetime import datetime
-import time
 from sqlalchemy.orm.exc import NoResultFound
 import uuid
 from sqlalchemy import delete, desc, insert, select, update
@@ -24,7 +23,6 @@ class RoomService():
 
     @injectDb
     def getMy(self, user_id: uuid.UUID, db: Session) -> list[RoomModelNew]:
-        time.sleep(10)
         rooms = db.execute(
             select(RoomModelNew)
             .join(

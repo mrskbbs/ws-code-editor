@@ -1,6 +1,7 @@
 .room {
     min-height: max-content;
-    overflow: hidden;
+    height: max-content;
+    min-width: fit-content;
     background: rgba(255, 255, 255, 2%);
     padding: 1em;
     border-radius: 1em;
@@ -16,6 +17,7 @@
     position: relative;
 }
 .room > * {
+    user-select: none;
     transition: var(--color-transition);
 }
 .room:active > * {
@@ -23,10 +25,6 @@
 }
 .room:active > * > svg {
     fill: var(--dark);
-}
-.room:active {
-    background-color: var(--violet);
-    transform: translateY(0.5em);
 }
 .room:hover {
     border-color: var(--violet);
@@ -59,4 +57,7 @@
 }
 .delete > svg:hover {
     fill: var(--red);
+}
+.delete > svg:active {
+    fill: var(--dark);
 }

@@ -5,7 +5,11 @@ import CloseSVG from "../../public/svg/close.svg";
 import { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 
-export const ErrorPopups = observer(({ text }: { text: string[] }) => {
+interface ICErrorPopups {
+    text: string[];
+}
+
+export const ErrorPopups = observer(({ text }: ICErrorPopups) => {
     const [is_open, setIsOpen] = useState(() => true);
     useEffect(() => {
         setIsOpen(() => true);

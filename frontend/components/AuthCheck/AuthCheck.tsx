@@ -15,32 +15,35 @@ const DefaultFallback = () => {
     );
 };
 
-export const AuthCheck = observer(
-    ({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) => {
-        const [is_loading, setIsLoading] = useState(true);
-        const [is_error, setIsError] = useState(null as string | null);
+interface ICAuthCheck {
+    children: React.ReactNode;
+    fallback?: React.ReactNode;
+}
 
-        useEffect(() => {
-            auth_store
-                .update()
-                .then(() => {
-                    setIsLoading(() => false);
-                })
-                .catch((err: Error) => {
-                    setIsError(() => err.message);
-                })
-                .finally(() => {
-                    setIsLoading(() => false);
-                });
-        }, []);
+export const AuthCheck = observer(({ children, fallback }: ICAuthCheck) => {
+    const [is_loading, setIsLoading] = useState(true);
+    const [is_error, setIsError] = useState(null as string | null);
 
-        if (is_loading) {
-            return <Spinner text="Loading" />;
-        }
-        if (is_error) {
-            if (fallback === undefined) return <DefaultFallback />;
-            return <>{fallback}</>;
-        }
-        return <>{children}</>;
+    useEffect(() => {
+        auth_store
+            .update()
+            .then(() => {
+                setIsLoading(() => false);
+            })
+            .catch((err: Error) => {
+                setIsError(() => err.message);
+            })
+            .finally(() => {
+                setIsLoading(() => false);
+            });
+    }, []);
+
+    if (is_loading) {
+        return <Spinner text="Loading" />;
     }
-);
+    if (is_error) {
+        if (fallback === undefined) return <DefaultFallback />;
+        return <>{fallback}</>;
+    }
+    return <>{children}</>;
+});

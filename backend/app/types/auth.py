@@ -19,6 +19,7 @@ class AuthSessionInfo(TypedDict):
 
 class HashableAuthSessionInfo():
     id: str
+    sid: str
     username: str
     full: AuthSessionInfo
     

@@ -1,5 +1,4 @@
 .container {
-    height: auto;
     max-height: 25em;
     display: flex;
     flex-direction: column;
@@ -40,7 +39,7 @@
     background: none;
     font-family: "SourceCodePro";
     width: 100%;
-    font-size: 1.05em;
+    font-size: 1em;
     line-height: 1.25em;
     margin-inline: 0em;
     padding-inline: 0em;
@@ -50,6 +49,10 @@
     outline: 0em;
     overflow: hidden;
     tab-size: 4;
+}
+.textarea > textarea::selection {
+    background-color: var(--foreground);
+    color: var(--background);
 }
 .fake_scroll {
     margin-left: 2em;

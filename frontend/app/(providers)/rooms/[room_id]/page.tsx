@@ -8,7 +8,7 @@ import { useWS } from "@/hooks/useWS";
 import { diffApply, jsonKey } from "@/utils";
 import { Connections } from "@/components/Connections/Connections";
 import { ErrorPopups } from "@/components/ErrorPopups/ErrorPopups";
-import { TextStatic } from "@/components/TextStatic/TextStatic";
+import { Output } from "@/components/Output/Output";
 import LeaveSVG from "@/public/svg/leave.svg";
 import PlaySVG from "@/public/svg/play.svg";
 import ClockSVG from "@/public/svg/clock.svg";
@@ -142,7 +142,7 @@ function RoomPage() {
                         setLocations={(val) => room.setLocationsStdin(val)}
                         socket={socket.current}
                     />
-                    <TextStatic label="Output" style={{ gridArea: "stdout" }} text={room.stdout} />
+                    <Output label="Output" style={{ gridArea: "stdout" }} text={room.stdout} />
                 </div>
             </main>
         </>

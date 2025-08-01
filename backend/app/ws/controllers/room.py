@@ -16,11 +16,13 @@ class RoomWSController():
     rooms: dict[uuid.UUID, RoomDynamicModel]
     room: RoomDynamicModel = None
     user: AuthSessionInfo
+    user_hashable: HashableAuthSessionInfo
 
     def __init__(self, request: Request, rooms: dict[uuid.UUID, RoomDynamicModel]):
         self.request = request
         self.rooms = rooms
         self.user = session["user"]
+        self.user_hashable  = HashableAuthSessionInfo(self.user)
 
         self.room_id = uuid.UUID(self.request.args.get("room_id"))
         self.room = self.rooms.get(self.room_id)
@@ -74,13 +76,9 @@ class RoomWSController():
             disconnect()
             raise Exception("You are not allowed")
 
-        if self.user["id"] in self.room.connections:
-            disconnect()
-            raise Exception("You are already present in this room from another device")
-        
 
         join_room(room=str(self.room.id), sid=self.request.sid)
-        self.room.connections.add(HashableAuthSessionInfo(self.user))
+        self.room.connections.add(self.user_hashable)
         emit("init", {
             "name": self.room.name,
             "invite_token": self.room.invite_token
@@ -96,16 +94,16 @@ class RoomWSController():
 
 
     def disconnect(self):
-        print(list(self.room.connections), self.user)
         leave_room(room=str(self.room.id), sid=self.request.sid)
-        if HashableAuthSessionInfo(self.user) in self.room.connections:
-            self.room.connections.remove(HashableAuthSessionInfo(self.user))
 
-        emit(
-            "connections", 
-            self.__formatConnections__(), 
-            to=self.room.id
-        )
+        if self.user_hashable in self.room.connections:
+            self.room.connections.remove(self.user_hashable)
+
+            emit(
+                "connections", 
+                self.__formatConnections__(), 
+                to=self.room.id
+            )
 
         if len(self.room.connections) == 0:
             self.rooms.pop(self.room_id, None)

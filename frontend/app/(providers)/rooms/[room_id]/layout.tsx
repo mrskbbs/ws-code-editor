@@ -3,6 +3,7 @@
 import { AuthCheck } from "@/components/AuthCheck/AuthCheck";
 import { RoomContextProvider } from "@/components/RoomContext";
 import { RoomStore } from "@/stores/room";
+import { Metadata } from "next";
 import { useParams } from "next/navigation";
 import React, { createContext } from "react";
 

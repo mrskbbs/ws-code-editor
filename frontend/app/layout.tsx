@@ -1,4 +1,13 @@
+import Head from "next/head";
 import "./globals.css";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: {
+        default: "Code Editor",
+        template: "%s - Code Editor",
+    },
+};
 
 export default function RootLayout({
     children,

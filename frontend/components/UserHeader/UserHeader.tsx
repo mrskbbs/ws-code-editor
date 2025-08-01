@@ -4,12 +4,9 @@ import { useRouter } from "next/navigation";
 import { ProfilePic } from "../ProfilePic/ProfilePic";
 import styles from "./UserHeader.module.css";
 import LeaveSVG from "@/public/svg/leave.svg";
-import { useContext } from "react";
-import { ModalWrapperContext } from "../ModalWrapper/ModalWrapper";
 
 export const UserHeader = observer(() => {
     const router = useRouter();
-    const { open } = useContext(ModalWrapperContext);
 
     // I dont want to use ? for every auth_store usage
     if (auth_store.user === null) return;
