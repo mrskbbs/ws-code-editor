@@ -4,3 +4,5 @@
 **/venv
 **/.env
 **/*.log
+**/pyproject.toml
+**/plan.md

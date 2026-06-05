@@ -1,6 +1,0 @@
-.evenline {
-    background-color: var(--background);
-}
-.oddline {
-    background-color: color-mix(in srgb, var(--background), white 3%);
-}
