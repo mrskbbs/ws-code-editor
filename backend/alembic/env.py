@@ -1,78 +1,147 @@
+import logging
 from logging.config import fileConfig
+import re
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import MetaData, pool
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
+
+import os
+from dotenv import load_dotenv
+import asyncio
+
+load_dotenv(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        ".env",
+    )
+)
+
+from app.db import Base
+import app.db.models
+
+DB_URL = os.environ["DB_URL"]
+TESTS_DB_URL = os.environ["TESTS_DB_URL"]
+
+USE_TWOPHASE = False
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+logger = logging.getLogger("alembic.env")
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = None
+# Inject the URLs from the environment into the per-database sections
+# BEFORE we read those sections to build engines.
+config.set_section_option("main_db", "sqlalchemy.url", DB_URL)
+config.set_section_option("tests_db", "sqlalchemy.url", TESTS_DB_URL)
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# gather section names referring to different databases.
+db_names = config.get_main_option("databases", "")
+
+# Model MetaData per database, for 'autogenerate' support.
+target_metadata = {
+    "main_db": Base.metadata,
+    "tests_db": Base.metadata,
+}
+
+
+def _iter_db_names():
+    """Yield non-empty, stripped database section names."""
+    return [n for n in re.split(r",\s*", db_names) if n]
 
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
+    This configures the context with just a URL and not an Engine,
+    so we don't even need a DBAPI to be available.
     """
-    url = config.get_main_option("sqlalchemy.url")
+    # for the --sql use case, run migrations for each URL into
+    # individual files.
+    engines = {}
+    for name in _iter_db_names():
+        engines[name] = rec = {}
+        rec["url"] = context.config.get_section_option(name, "sqlalchemy.url")
+
+    for name, rec in engines.items():
+        logger.info("Migrating database %s" % name)
+        file_ = "%s.sql" % name
+        logger.info("Writing output to %s" % file_)
+        with open(file_, "w") as buffer:
+            context.configure(
+                url=rec["url"],
+                output_buffer=buffer,
+                target_metadata=target_metadata.get(name),
+                literal_binds=True,
+                dialect_opts={"paramstyle": "named"},
+            )
+            with context.begin_transaction():
+                context.run_migrations(engine_name=name)
+
+
+def do_run_migrations(connection, name):
+    """Synchronous migration body, executed via run_sync per engine."""
     context.configure(
-        url=url,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
+        connection=connection,
+        upgrade_token="%s_upgrades" % name,
+        downgrade_token="%s_downgrades" % name,
+        target_metadata=target_metadata.get(name),
     )
-
-    with context.begin_transaction():
-        context.run_migrations()
+    context.run_migrations(engine_name=name)
 
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+async def run_migrations_online() -> None:
+    """Run migrations in 'online' mode (async engines).
 
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
+    Start a transaction on all engines, run all migrations,
+    then commit all transactions.
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
+    engines = {}
+    for name in _iter_db_names():
+        engines[name] = rec = {}
+        rec["engine"] = async_engine_from_config(
+            context.config.get_section(name, {}),
+            prefix="sqlalchemy.",
+            poolclass=pool.NullPool,
         )
 
-        with context.begin_transaction():
-            context.run_migrations()
+    for name, rec in engines.items():
+        engine = rec["engine"]
+        rec["connection"] = conn = await engine.connect()
+        if USE_TWOPHASE:
+            rec["transaction"] = await conn.begin_twophase()
+        else:
+            rec["transaction"] = await conn.begin()
+
+    try:
+        for name, rec in engines.items():
+            logger.info("Migrating database %s" % name)
+            await rec["connection"].run_sync(do_run_migrations, name)
+
+        if USE_TWOPHASE:
+            for rec in engines.values():
+                await rec["transaction"].prepare()
+
+        for rec in engines.values():
+            await rec["transaction"].commit()
+    except:
+        for rec in engines.values():
+            await rec["transaction"].rollback()
+        raise
+    finally:
+        for rec in engines.values():
+            await rec["connection"].close()
+        for rec in engines.values():
+            await rec["engine"].dispose()
 
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    run_migrations_online()
+    asyncio.run(run_migrations_online())
