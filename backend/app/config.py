@@ -11,4 +11,7 @@ load_dotenv(
 
 DB_URL = str(os.environ.get("DB_URL"))
 TESTS_DB_URL = str(os.environ.get("TESTS_DB_URL"))
-
+JWT_KEY = str(os.environ.get("JWT_KEY"))
+JWT_ALGO = str(os.environ.get("JWT_ALGO")) # must be a symmetric algo 
+SALT = str(os.environ.get("SALT"))
+ORIGIN_REGEX = r"(http[s]{0,1})\:\/\/localhost\:[0-9]{0,5}"

@@ -10,7 +10,7 @@ class Room(Base):
     id: Mapped[int] = mapped_column(primary_key=True, nullable=False)
     title: Mapped[str] = mapped_column(String(64), nullable=False)
     code: Mapped[str] = mapped_column(nullable=False, default="")
-    invite_token: Mapped[str] = mapped_column(String(32), nullable=False, unique=True)
+    invite_token: Mapped[str] = mapped_column(String(36), nullable=False, unique=True)
 
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     language_id: Mapped[int] = mapped_column(ForeignKey("language.id"), nullable=False)

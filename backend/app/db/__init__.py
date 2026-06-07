@@ -1,4 +1,4 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base
 from app.config import DB_URL
 
@@ -12,7 +12,7 @@ Session = async_sessionmaker(
     autocommit=False,
 )
 
-async def getDb():
+async def getDb(): 
     session = Session()
     try:
         yield session
