@@ -1,10 +1,13 @@
 """Behavioural tests for the /rooms router (HTTP only; the websocket route is
 covered separately under ``tests/ws/``).
 
-The whole router sits behind auth, so every endpoint has a "no auth -> 401"
-test. Endpoints that are currently stubs (``editRoom`` does not yet apply the
-payload; ``deleteRoom`` is a no-op) are described with ``xfail`` so they turn
-green the moment they're implemented.
+Each test states what the endpoint is *expected* to do, derived from the route's
+intent — not from its current implementation. The whole router sits behind auth,
+so every endpoint has a "no auth -> 401" test.
+
+The updated router refreshes ``members``/``owner``/``language`` on create and
+edit (so those relationships come back in the response body) and implements
+delete; the tests below assert the resulting expected output.
 """
 
 import pytest
@@ -100,6 +103,49 @@ class TestCreateRoom:
         assert room is not None
         assert room.title == "Project X"
 
+    async def test_response_includes_refreshed_relationships(self, client, db):
+        # The updated endpoint refreshes owner/language/members before returning,
+        # so the response body should carry those nested objects.
+        user = await create_user(db)
+        language = await create_language(db)
+
+        res = await client.post(
+            "/rooms/",
+            json={"title": "with rels", "language_id": language.id},
+            cookies=auth_cookies(user.id),
+        )
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body["owner"]["id"] == user.id
+        assert body["owner"]["username"] == user.username
+        assert body["language"]["id"] == language.id
+        assert body["language"]["name"] == language.name
+        assert isinstance(body["members"], list)
+
+    async def test_creator_can_access_created_room(self, client, db):
+        # Creating a room must let the creator reach it afterwards: it should
+        # appear in their room list and be readable by id (both gated on
+        # membership), so creation has to make the creator a member.
+        user = await create_user(db)
+        language = await create_language(db)
+
+        created = await client.post(
+            "/rooms/",
+            json={"title": "mine", "language_id": language.id},
+            cookies=auth_cookies(user.id),
+        )
+        assert created.status_code == 200
+        room_id = created.json()["id"]
+
+        listed = await client.get("/rooms/", cookies=auth_cookies(user.id))
+        assert listed.status_code == 200
+        assert room_id in [r["id"] for r in listed.json()]
+
+        got = await client.get(f"/rooms/{room_id}", cookies=auth_cookies(user.id))
+        assert got.status_code == 200
+        assert got.json()["id"] == room_id
+
     async def test_missing_fields_is_validation_error(self, client, db):
         user = await create_user(db)
 
@@ -139,6 +185,22 @@ class TestRoomInvite:
             )
         )
         assert is_member is True
+
+    async def test_joined_room_appears_in_my_rooms(self, client, db):
+        # After accepting an invite, the room should show up in the joiner's list.
+        owner = await create_user(db)
+        joiner = await create_user(db)
+        room = await create_room(db, owner=owner)
+
+        join = await client.get(
+            f"/rooms/invite/{room.invite_token}",
+            cookies=auth_cookies(joiner.id),
+        )
+        assert join.status_code == 200
+
+        listed = await client.get("/rooms/", cookies=auth_cookies(joiner.id))
+        assert listed.status_code == 200
+        assert room.id in [r["id"] for r in listed.json()]
 
     async def test_invalid_token_is_not_found(self, client, db):
         user = await create_user(db)
@@ -182,10 +244,6 @@ class TestGetRoom:
 # PUT /rooms/{id}  (edit a room)
 # --------------------------------------------------------------------------- #
 class TestEditRoom:
-    @pytest.mark.xfail(
-        reason="editRoom does not yet apply the request payload",
-        strict=False,
-    )
     async def test_updates_title(self, client, db):
         user = await create_user(db)
         room = await create_room(db, owner=user, title="old title")
@@ -199,16 +257,33 @@ class TestEditRoom:
         assert res.status_code == 200
         assert res.json()["title"] == "new title"
 
-        refreshed = await db.scalar(select(Room).where(Room.id == room.id))
-        assert refreshed is not None
-        assert refreshed.title == "new title"
+        # Read the persisted value fresh (avoid the identity-map cache).
+        await db.refresh(room)
+        assert room.title == "new title"
+
+    async def test_response_includes_refreshed_relationships(self, client, db):
+        # Edit refreshes owner/language/members like create does.
+        user = await create_user(db)
+        language = await create_language(db)
+        room = await create_room(db, owner=user, language=language, title="t")
+
+        res = await client.put(
+            f"/rooms/{room.id}",
+            json={"title": "edited"},
+            cookies=auth_cookies(user.id),
+        )
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body["owner"]["id"] == user.id
+        assert body["language"]["id"] == language.id
+        assert isinstance(body["members"], list)
 
 
 # --------------------------------------------------------------------------- #
 # DELETE /rooms/{id}  (delete a room)
 # --------------------------------------------------------------------------- #
 class TestDeleteRoom:
-    @pytest.mark.xfail(reason="deleteRoom is not implemented yet", strict=False)
     async def test_deletes_room(self, client, db):
         user = await create_user(db)
         room = await create_room(db, owner=user)
@@ -223,3 +298,16 @@ class TestDeleteRoom:
             select(func.count()).select_from(Room).where(Room.id == room.id)
         )
         assert remaining == 0
+
+    async def test_deleted_room_no_longer_listed(self, client, db):
+        user = await create_user(db)
+        room = await create_room(db, owner=user)
+
+        res = await client.delete(
+            f"/rooms/{room.id}", cookies=auth_cookies(user.id)
+        )
+        assert res.status_code in (200, 204)
+
+        listed = await client.get("/rooms/", cookies=auth_cookies(user.id))
+        assert listed.status_code == 200
+        assert room.id not in [r["id"] for r in listed.json()]
