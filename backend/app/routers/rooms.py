@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from sqlalchemy import insert, select, update
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import getDb
@@ -36,7 +36,7 @@ async def createRoom(data, req: Request, res: Response, db: AsyncSession = Depen
 
     await db.commit()
 
-    # TODO: load additional fields
+    await db.refresh(room, ["members", "owner", "language"])
 
     return room
 
@@ -101,13 +101,18 @@ async def editRoom(id: int, data, req: Request, res: Response, db: AsyncSession 
 
     await db.commit()
     
-    # TODO: load additional fields
+    await db.refresh(room, ["members", "owner", "language"])
 
     return room
 
 @rooms_router.delete("/{id}")
-async def deleteRoom(id: int, req: Request, res: Response):
-    pass
+async def deleteRoom(id: int, req: Request, res: Response, db: AsyncSession = Depends(getDb)):
+    await db.execute(
+        delete(Room)
+        .where(Room.id == id)
+    )
 
-rooms_router.add_websocket_route("/{id}/ws", RoomsManagerWS)
+    return { "message": "Succesfully deleted a room" }
+
+# rooms_router.add_websocket_route("/{id}/ws", RoomsManagerWS)
 

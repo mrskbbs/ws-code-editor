@@ -12,7 +12,7 @@ class Room(Base):
     code: Mapped[str] = mapped_column(nullable=False, default="")
     invite_token: Mapped[str] = mapped_column(String(36), nullable=False, unique=True)
 
-    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
     language_id: Mapped[int] = mapped_column(ForeignKey("language.id"), nullable=False)
 
     owner: Mapped["User"] = relationship(back_populates="owned_rooms")

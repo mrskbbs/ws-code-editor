@@ -2,6 +2,7 @@ from app.routers import *
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import ORIGIN_REGEX
+import uvicorn
 
 app = FastAPI(root_path="/api/v1")
 
@@ -15,3 +16,6 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(rooms_router)
+
+if __name__ == "__main__":
+    uvicorn.run(app, port=8000, host="localhost")
