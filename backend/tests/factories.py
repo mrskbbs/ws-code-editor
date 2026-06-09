@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.language import Language
 from app.db.models.room import Room
-from app.db.models.room_members import room_members_association_table as room_members
+from app.db.models.room_members import room_members
 from app.db.models.user import User
 
 from helpers import hash_password

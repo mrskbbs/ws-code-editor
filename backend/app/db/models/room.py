@@ -2,8 +2,7 @@ from typing import List
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db import Base
-from .room_members import room_members_association_table
-
+from .room_members import room_members
 class Room(Base):
     __tablename__ = "rooms"
 
@@ -16,5 +15,5 @@ class Room(Base):
     language_id: Mapped[int] = mapped_column(ForeignKey("language.id"), nullable=False)
 
     owner: Mapped["User"] = relationship(back_populates="owned_rooms")
-    members: Mapped[List["User"]] = relationship(secondary=room_members_association_table, back_populates="rooms")
+    members: Mapped[List["User"]] = relationship(secondary=room_members, back_populates="rooms")
     language: Mapped["Language"] = relationship()

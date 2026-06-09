@@ -14,7 +14,7 @@ import pytest
 from sqlalchemy import func, select
 
 from app.db.models.room import Room
-from app.db.models.room_members import room_members_association_table as room_members
+from app.db.models.room_members import room_members
 
 from factories import add_member, create_language, create_room, create_user
 from helpers import auth_cookies
