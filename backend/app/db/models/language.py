@@ -1,4 +1,4 @@
-from sqlalchemy import String, nulls_last
+from sqlalchemy import String
 from sqlalchemy.orm import mapped_column, Mapped
 from app.db import Base
 
