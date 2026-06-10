@@ -1,7 +1,6 @@
-from fastapi import Depends, HTTPException, Request, Response, status
+from fastapi import HTTPException, Request, Response, status
 import jwt
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import JWT_ALGO, JWT_KEY, SALT
 from app.db import DbDep

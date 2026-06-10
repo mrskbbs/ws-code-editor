@@ -1,8 +1,7 @@
 from uuid import uuid4
 
-from fastapi import Depends, HTTPException, Request, Response, status
+from fastapi import HTTPException, Request, Response, status
 from sqlalchemy import insert, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import DbDep
 from app.db.models.room import Room

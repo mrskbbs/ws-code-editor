@@ -11,8 +11,21 @@ Everything here is imported lazily and the websocket tests are skipped until the
 (currently incomplete) websocket route to be importable.
 """
 
+import os
+import sys
+
 import pytest
-import pytest_asyncio
+
+# The parent ``tests/conftest.py`` puts the backend root and the tests dir on
+# ``sys.path`` (so ``import app`` / ``import factories`` work). Re-do it here so
+# these tests import cleanly even when collected directly (e.g.
+# ``pytest tests/ws/test_room_ws.py``) and the parent conftest hasn't been
+# loaded yet.
+_TESTS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_BACKEND_DIR = os.path.dirname(_TESTS_DIR)
+for _path in (_BACKEND_DIR, _TESTS_DIR):
+    if _path not in sys.path:
+        sys.path.insert(0, _path)
 
 from app.db import getDb
 
@@ -47,3 +60,25 @@ def ws_client(sessionmaker_):
             yield test_client
     finally:
         fastapi_app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def reset_room_manager():
+    """Reset the process-global websocket room state around every ws test.
+
+    ``room_manager`` is a module-level singleton and ``WSRoom.connections`` is a
+    shared mapping, so without this an aborted connection in one test could leak
+    rooms/connections into the next. Cleared before *and* after each test so the
+    in-memory "room created / room deleted" assertions start from a clean slate.
+    """
+    from app.ws.room_manager import room_manager
+    from app.ws.room import WSRoom
+
+    def _clear():
+        room_manager.rooms.clear()
+        # connections lives on the class, not the instance, in the current impl.
+        WSRoom.connections.clear()
+
+    _clear()
+    yield
+    _clear()
