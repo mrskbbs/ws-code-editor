@@ -1,7 +1,7 @@
 from typing import Any
 from fastapi import WebSocketException, status
 from app.db.models.room import Room
-from app.schemas.ws import WSRoomConnection
+from app.schemas.ws import WSRoomAction, WSRoomConnection
 from app.ws.room import WSRoom
 
 class WSRoomManager():
@@ -33,8 +33,9 @@ class WSRoomManager():
     async def handle(self, room: Room, conn: WSRoomConnection, data: Any):
         if room.id not in self.rooms.keys():
             raise WebSocketException(status.WS_1011_INTERNAL_ERROR)
+        try:
+            data_valid = WSRoomAction.model_validate(data)
+        except:
+            raise WebSocketException(status.WS_1003_UNSUPPORTED_DATA)
 
-        await self.rooms[room.id].handle(conn, data)
-
-
-room_manager = WSRoomManager()
+        await self.rooms[room.id].handle(conn, data_valid)

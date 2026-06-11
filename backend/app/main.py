@@ -2,9 +2,13 @@ from app.routers import *
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import ORIGIN_REGEX
+from app.lifespan import appLifespan
 import uvicorn
 
-app = FastAPI(root_path="/api/v1")
+app = FastAPI(
+    root_path="/api/v1",
+    lifespan=appLifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,

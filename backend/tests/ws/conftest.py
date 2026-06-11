@@ -31,7 +31,7 @@ from app.db import getDb
 
 
 @pytest.fixture
-def ws_client(sessionmaker_):
+def ws_client(engine):
     """A synchronous ``TestClient`` for exercising websocket routes.
 
     Use it like::
@@ -45,14 +45,31 @@ def ws_client(sessionmaker_):
     Note this fixture is synchronous (TestClient is sync); async ``db`` setup
     should be done in the test body before opening the connection, or via the
     async fixtures from the parent ``conftest``.
+
+    The DB override deliberately does *not* reuse the parent ``sessionmaker_``:
+    that engine is bound to pytest's event loop, whereas ``TestClient`` runs the
+    app in its own portal-thread loop, and ``asyncpg`` connections are pinned to
+    the loop that created them (sharing one engine raises "Future attached to a
+    different loop"). Instead each request gets a throwaway ``NullPool`` engine
+    created inside the app's loop, pointed at the same test database — so it
+    sees the rows the test's ``db`` session has committed. Depending on
+    ``engine`` (not ``sessionmaker_``) is only to guarantee the schema exists.
     """
     from fastapi.testclient import TestClient
+    from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+    from sqlalchemy.pool import NullPool
 
+    from app.config import TESTS_DB_URL
     from app.main import app as fastapi_app
 
     async def _override_get_db():
-        async with sessionmaker_() as session:
-            yield session
+        request_engine = create_async_engine(TESTS_DB_URL, poolclass=NullPool)
+        try:
+            maker = async_sessionmaker(request_engine, expire_on_commit=False)
+            async with maker() as session:
+                yield session
+        finally:
+            await request_engine.dispose()
 
     fastapi_app.dependency_overrides[getDb] = _override_get_db
     try:
@@ -62,23 +79,14 @@ def ws_client(sessionmaker_):
         fastapi_app.dependency_overrides.clear()
 
 
-@pytest.fixture(autouse=True)
-def reset_room_manager():
-    """Reset the process-global websocket room state around every ws test.
+@pytest.fixture
+def manager(ws_client):
+    """The live ``WSRoomManager`` the app is using, reached through the app
+    under test (``app.state.room_manager``) rather than by importing the module.
 
-    ``room_manager`` is a module-level singleton and ``WSRoom.connections`` is a
-    shared mapping, so without this an aborted connection in one test could leak
-    rooms/connections into the next. Cleared before *and* after each test so the
-    in-memory "room created / room deleted" assertions start from a clean slate.
+    Each ``ws_client`` builds a fresh ``TestClient``, whose lifespan creates a
+    fresh manager, so this is naturally isolated per test — no global reset
+    needed. Tests use it for the in-memory "room created / deleted" assertions;
+    everything else is asserted through the websocket protocol itself.
     """
-    from app.ws.room_manager import room_manager
-    from app.ws.room import WSRoom
-
-    def _clear():
-        room_manager.rooms.clear()
-        # connections lives on the class, not the instance, in the current impl.
-        WSRoom.connections.clear()
-
-    _clear()
-    yield
-    _clear()
+    return ws_client.app.state.room_manager
