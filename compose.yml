@@ -1,0 +1,54 @@
+services:
+  # Base services
+  cpp:
+    image: clang:latest
+    network_mode: none
+  js:
+    image: node:lts-alpine
+    network_mode: none
+  py:
+    image: python:alpine
+    network_mode: none
+
+  dockerproxy:
+    build: ./dockerproxy/
+    port: 1337
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/dokcer.sock
+    depends_on:
+      - cpp
+      - js
+      - py
+
+  # Backend tests
+  test_db:
+    image: postgres:alpine
+    profiles: [test]
+    tmpfs: /var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+  test_backend:
+    profiles: [test]
+    depends_on:
+      - test_db
+      - dockerproxy
+
+  # Prod Services
+  db:
+    profile: [prod]
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+  backend:
+    profile: [prod]
+  frontend:
+    profile: [prod]
+  nginx:
+    profile: [prod]
