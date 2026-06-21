@@ -1,10 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	moby "github.com/moby/moby/client"
+	"dockerproxy/sandboxes"
+	"encoding/json"
 )
 
 type Payload struct {
@@ -12,6 +14,15 @@ type Payload struct {
 }
 
 func main(){
+	docker, err := moby.New(moby.FromEnv)
+
+	if err != nil {
+		panic(err)
+	}
+
+	py_sandbox := sandboxes.PySandbox{}
+	py_sandbox.Init(docker)
+
 	http.HandleFunc("POST /{language}/exec", func(w http.ResponseWriter, r *http.Request) {
 		language := r.PathValue("language")
 		var body Payload
@@ -25,16 +36,23 @@ func main(){
 
 		switch language{
 			case "js": 
-				fmt.Fprint(w, "js", body.Code)
+				fmt.Fprint(w, "js")
 			case "cpp":
-				fmt.Fprint(w, "cpp", body.Code)
+				fmt.Fprint(w, "cpp")
 			case "py":
-				fmt.Fprint(w, "py", body.Code)
+				output, err := py_sandbox.Exec(body.Code)
+
+				if err != nil {
+					http.Error(w, err.Error(), 500)
+					return 
+				}
+
+				fmt.Fprint(w, "py", output.Stdout)
 			default:
 				http.Error(w, "Invalid language", 400)
 		}
 	})
 
-	err := http.ListenAndServe(":8080", nil)
+	err = http.ListenAndServe(":8080", nil)
 	log.Fatal(err)
 }

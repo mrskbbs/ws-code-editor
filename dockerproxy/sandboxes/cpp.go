@@ -1,6 +1,5 @@
 package sandboxes
 
 type CppSandbox struct { BaseLanguageSandbox }
-func (s CppSandbox) Exec() ExecutionOutput {
-	// return nil
-}
+// func (s CppSandbox) Exec() ExecutionOutput {
+// }
