@@ -1,14 +1,46 @@
 services:
   # Base services
   cpp:
-    image: clang:latest
+    container_name: cpp-sandbox
+    build:
+      context: ./sandboxes/
+      dockerfile: cpp.Dockerfile
+    read_only: true
     network_mode: none
+    cap_drop:
+        - ALL
+    security-opt:
+      - no-new-privileges:true 
+    volumes:
+      - cpp-sandbox-vol:/home/sandbox
+
   js:
-    image: node:lts-alpine
+    container_name: js-sandbox
+    build:
+      context: ./sandboxes/
+      dockerfile: js.Dockerfile
+    read_only: true
     network_mode: none
+    cap_drop:
+        - ALL
+    security-opt:
+      - no-new-privileges:true 
+    volumes:
+      - js-sandbox-vol:/home/sandbox
+
   py:
-    image: python:alpine
+    container_name: py-sandbox
+    build:
+      context: ./sandboxes/
+      dockerfile: py.Dockerfile
     network_mode: none
+    cap_drop:
+        - ALL
+    security-opt:
+      - no-new-privileges:true 
+    read_only: true
+    volumes:
+      - py-sandbox-vol:/home/sandbox
 
   dockerproxy:
     build: ./dockerproxy/
@@ -52,3 +84,23 @@ services:
     profile: [prod]
   nginx:
     profile: [prod]
+
+volumes:
+  py-sandbox-vol:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      o: size=64m,nodev,nosuid
+      device: tmpfs
+  js-sandbox-vol:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      o: size=64m,nodev,nosuid
+      device: tmpfs
+  cpp-sandbox-vol:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      o: size=64,nodev,nosuidm
+      device: tmpfs
