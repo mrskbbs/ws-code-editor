@@ -9,9 +9,7 @@ import (
 	moby "github.com/moby/moby/client"
 )
 
-type PySandbox struct { 
-	BaseLanguageSandbox
-}
+type PySandbox struct { BaseLanguageSandbox }
 
 func (s *PySandbox) Exec(code string) (*ExecutionOutput, error) {
 	name := fmt.Sprintf("%s.py", uuid.New().String())
@@ -22,17 +20,22 @@ func (s *PySandbox) Exec(code string) (*ExecutionOutput, error) {
 		return nil, err
 	}
 
-	s.docker.CopyToContainer(s.ctx, "py-sandbox", moby.CopyToContainerOptions{
-		DestinationPath: "/",
+	if _, err := s.docker.CopyToContainer(s.ctx, "py-sandbox", moby.CopyToContainerOptions{
+		DestinationPath: "/home/sandbox",
 		Content: tar_reader,
-	})
+		CopyUIDGID: true,
+	}); err != nil {
+		return nil, err
+	}
 
 	exec_res, err := s.docker.ExecCreate(s.ctx, "py-sandbox", moby.ExecCreateOptions{
-		Cmd: []string{"python", name},
+		Cmd: []string{"bash", "-c", fmt.Sprintf("python %[1]s && rm -f %[1]s", name)},
 		AttachStdin: true,
 		AttachStdout: true,
 		AttachStderr: true,
 		TTY: true,
+		User: "sandbox",
+		WorkingDir: "/home/sandbox",
 	})
 
 	if err != nil {

@@ -23,6 +23,12 @@ func main(){
 	py_sandbox := sandboxes.PySandbox{}
 	py_sandbox.Init(docker)
 
+	js_sandbox := sandboxes.JSSandbox{}
+	js_sandbox.Init(docker)
+
+	cpp_sandbox := sandboxes.CppSandbox{}
+	cpp_sandbox.Init(docker)
+
 	http.HandleFunc("POST /{language}/exec", func(w http.ResponseWriter, r *http.Request) {
 		language := r.PathValue("language")
 		var body Payload
@@ -35,10 +41,24 @@ func main(){
 		}
 
 		switch language{
-			case "js": 
-				fmt.Fprint(w, "js")
+			case "js":
+				output, err := js_sandbox.Exec(body.Code)
+
+				if err != nil {
+					http.Error(w, err.Error(), 500)
+					return 
+				}
+
+				fmt.Fprint(w, "js", output.Stdout)
 			case "cpp":
-				fmt.Fprint(w, "cpp")
+				output, err := cpp_sandbox.Exec(body.Code)
+
+				if err != nil {
+					http.Error(w, err.Error(), 500)
+					return 
+				}
+
+				fmt.Fprint(w, "cpp", output.Stdout)
 			case "py":
 				output, err := py_sandbox.Exec(body.Code)
 
