@@ -1,65 +1,49 @@
 package sandboxes
 
 import (
-	"bytes"
-	"dockerproxy/utils"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/moby/moby/api/pkg/stdcopy"
+	"dockerproxy/utils"
 	moby "github.com/moby/moby/client"
 )
 
 type JSSandbox struct { BaseLanguageSandbox }
 
-func (s *JSSandbox) Exec(code string) (*ExecutionOutput, error) {
-	name := fmt.Sprintf("%s.js", uuid.New().String())
-
-	tar_reader, err := utils.TarFile(name, code)
+func (s *JSSandbox) ExecuteCode(code string) (*ExecutionOutput, error) {
+	uid, err := s.uidPicker.Pick()
 
 	if err != nil {
 		return nil, err
 	}
 
-	if _, err := s.docker.CopyToContainer(s.ctx, "js-sandbox", moby.CopyToContainerOptions{
-		DestinationPath: "/home/sandbox",
-		Content: tar_reader,
-		CopyUIDGID: true,
-	}); err != nil {
+	defer s.uidPicker.Release(uid)
+
+	file_id := uuid.New().String()
+	filename := fmt.Sprintf("%s.js", file_id)
+	
+	if err := s.copyCodeToContainer(filename, code, uid); err != nil {
 		return nil, err
 	}
 
-	exec_res, err := s.docker.ExecCreate(s.ctx, "js-sandbox", moby.ExecCreateOptions{
-		Cmd: []string{"bash", "-c", fmt.Sprintf("node %[1]s && rm -f %[1]s", name)},
-		AttachStdin: true,
-		AttachStdout: true,
-		AttachStderr: true,
-		TTY: true,
-		User: "sandbox",
-		WorkingDir: "/home/sandbox",
-	})
+	output, err := s.executeSandboxedCmd(
+		[]string{"bash", "-c", fmt.Sprintf("node %[1]s", filename)},
+		uid,
+	)	
 
 	if err != nil {
 		return nil, err
 	}
 
-	hijack, err := s.docker.ExecAttach(s.ctx, exec_res.ID, moby.ExecAttachOptions{})
-	if err != nil {
+	if err := s.cleanupCodeOnContainer(file_id); err != nil {
 		return nil, err
 	}
 
-	defer hijack.Close()
+	return output, nil
+}
 
-	var stdout_raw, stderr_raw bytes.Buffer
-
-	if _, err := stdcopy.StdCopy(&stdout_raw, &stderr_raw, hijack.Reader); err != nil {
-		return nil, err
-	}
-
-	stdout := stdout_raw.String()
-	stderr := stderr_raw.String()
-
-	return &ExecutionOutput{
-		Stdout: stdout,
-		Stderr: stderr,
-	}, nil
+func NewJSSandbox(client *moby.Client, uidPicker *utils.UIDPicker) *JSSandbox{
+	sandbox := JSSandbox{}
+	sandbox.container_name = "js-sandbox"
+	sandbox.Init(client, uidPicker)
+	return &sandbox
 }

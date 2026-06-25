@@ -6,14 +6,10 @@ import (
 )
 
 
-func TarFile(name string, content string) (*bytes.Reader, error) {
+func TarFile(name string, content string, header *tar.Header) (*bytes.Reader, error) {
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
-	hdr := &tar.Header{
-		Name: name,
-		Mode: 0644,
-		Size: int64(len(content)),
-	}
+	hdr := header 
 
 	if err := tw.WriteHeader(hdr); err != nil {
 		return nil, err

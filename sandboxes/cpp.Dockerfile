@@ -3,7 +3,9 @@ FROM gcc:latest
 USER root
 WORKDIR /
 SHELL ["/bin/bash", "-c"]
-RUN useradd --create-home -s /bin/bash -u 1000 sandbox
+RUN mkdir /sandbox
+RUN chown root:root /sandbox
+RUN chmod 0755 /sandbox
 
-WORKDIR /home/sandbox
+WORKDIR /sandbox
 USER sandbox

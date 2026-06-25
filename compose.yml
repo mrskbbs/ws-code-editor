@@ -90,17 +90,17 @@ volumes:
     driver: local
     driver_opts:
       type: tmpfs
-      o: size=64m,nodev,nosuid
+      o: size=64m,nodev,nosuid,uid=0,gid=0
       device: tmpfs
   js-sandbox-vol:
     driver: local
     driver_opts:
       type: tmpfs
-      o: size=64m,nodev,nosuid
+      o: size=64m,nodev,nosuid,uid=0,gid=0
       device: tmpfs
   cpp-sandbox-vol:
     driver: local
     driver_opts:
       type: tmpfs
-      o: size=64,nodev,nosuidm
+      o: size=64,nodev,nosuidm,uid=0,gid=0
       device: tmpfs
