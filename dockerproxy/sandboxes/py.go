@@ -44,6 +44,6 @@ func (s *PySandbox) ExecuteCode(code string) (*ExecutionOutput, error) {
 func NewPySandbox(client *moby.Client, uidPicker *utils.UIDPicker) *PySandbox{
 	sandbox := PySandbox{}
 	sandbox.container_name = "py-sandbox"
-	sandbox.Init(client, uidPicker)
+	sandbox.init(client, uidPicker)
 	return &sandbox
 }

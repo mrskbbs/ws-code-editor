@@ -44,6 +44,6 @@ func (s *CppSandbox) ExecuteCode(code string) (*ExecutionOutput, error) {
 func NewCppSandbox(client *moby.Client, uidPicker *utils.UIDPicker) *CppSandbox{
 	sandbox := CppSandbox{}
 	sandbox.container_name = "cpp-sandbox"
-	sandbox.Init(client, uidPicker)
+	sandbox.init(client, uidPicker)
 	return &sandbox
 }

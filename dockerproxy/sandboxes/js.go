@@ -44,6 +44,6 @@ func (s *JSSandbox) ExecuteCode(code string) (*ExecutionOutput, error) {
 func NewJSSandbox(client *moby.Client, uidPicker *utils.UIDPicker) *JSSandbox{
 	sandbox := JSSandbox{}
 	sandbox.container_name = "js-sandbox"
-	sandbox.Init(client, uidPicker)
+	sandbox.init(client, uidPicker)
 	return &sandbox
 }

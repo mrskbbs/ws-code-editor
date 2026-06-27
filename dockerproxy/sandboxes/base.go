@@ -13,7 +13,7 @@ import (
 )
 
 type LanguageSandbox interface {
-	Init(client *moby.Client)
+	init(client *moby.Client)
 	ExecuteCode(code string) (*ExecutionOutput, error)
 
 	executeSandboxedCmd(cmd []string) (*ExecutionOutput, error)
@@ -28,7 +28,7 @@ type BaseLanguageSandbox struct {
 	uidPicker *utils.UIDPicker
 }
 
-func (b *BaseLanguageSandbox) Init(client *moby.Client, uidPicker *utils.UIDPicker) {
+func (b *BaseLanguageSandbox) init(client *moby.Client, uidPicker *utils.UIDPicker) {
 	b.docker = client
 	b.ctx = context.Background()
 	b.uidPicker = uidPicker
@@ -101,7 +101,7 @@ func (b *BaseLanguageSandbox) executeSandboxedCmd (cmd []string, random_id int) 
 			AttachStdin: true,
 			AttachStdout: true,
 			AttachStderr: true,
-			TTY: true,
+			TTY: false,
 			User: fmt.Sprintf("%[1]d:%[1]d", random_id),
 			WorkingDir: "/sandbox",
 		},
