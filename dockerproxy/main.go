@@ -4,7 +4,6 @@ import (
 	"dockerproxy/sandboxes"
 	"dockerproxy/utils"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -32,41 +31,33 @@ func main(){
 
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
-			http.Error(w, err.Error(), 400)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			log.Fatal(err.Error())
 			return
 		}
 
+		var output *sandboxes.ExecutionOutput
 		switch language{
 			case "js":
-				output, err := js_sandbox.ExecuteCode(body.Code)
-
-				if err != nil {
-					http.Error(w, err.Error(), 500)
-					return 
-				}
-
-				fmt.Fprint(w, "js", output.Stdout)
+				output, err = js_sandbox.ExecuteCode(body.Code)
 			case "cpp":
-				output, err := cpp_sandbox.ExecuteCode(body.Code)
-
-				if err != nil {
-					http.Error(w, err.Error(), 500)
-					return 
-				}
-
-				fmt.Fprint(w, "cpp", output.Stdout)
+				output, err = cpp_sandbox.ExecuteCode(body.Code)
 			case "py":
-				output, err := py_sandbox.ExecuteCode(body.Code)
-
-				if err != nil {
-					http.Error(w, err.Error(), 500)
-					return 
-				}
-
-				fmt.Fprint(w, "py", output.Stdout)
+				output, err = py_sandbox.ExecuteCode(body.Code)
 			default:
-				http.Error(w, "Invalid language", 400)
+				http.Error(w, "Invalid language", http.StatusBadRequest)
+		}
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return 
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		if err := json.NewEncoder(w).Encode(output); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 
