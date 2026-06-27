@@ -17,10 +17,7 @@ func TestJSSuccessfullRun (t *testing.T) {
 
 	sandbox := NewJSSandbox(docker, utils.NewUIDPicker())
 
-	output, err := sandbox.ExecuteCode(`
-		let a = 20;
-		console.log(a * 3 + 3);
-	`)
+	output, err := sandbox.ExecuteCode(`let a = 20; console.log(a * 3 + 3);`)
 
 	if err != nil {
 		t.Fatal(err)
@@ -40,9 +37,7 @@ func TestJSUnsuccesfullRun (t *testing.T) {
 
 	sandbox := NewJSSandbox(docker, utils.NewUIDPicker())
 
-	output, err := sandbox.ExecuteCode(`
-		console.log(a * 3 + 3);
-	`)
+	output, err := sandbox.ExecuteCode(`console.log(a * 3 + 3);`)
 
 	if err != nil {
 		t.Fatal(err)

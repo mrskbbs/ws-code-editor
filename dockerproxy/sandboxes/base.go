@@ -92,7 +92,7 @@ func (b *BaseLanguageSandbox) cleanupCodeOnContainer(id string) error {
 	return nil
 }
 
-func (b *BaseLanguageSandbox) executeSandboxedCmd (cmd []string, random_id int) (*ExecutionOutput, error) {
+func (b *BaseLanguageSandbox) executeSandboxedCmd (cmd []string, uid int) (*ExecutionOutput, error) {
 	exec_res, err := b.docker.ExecCreate(
 		b.ctx, 
 		b.container_name, 
@@ -102,7 +102,7 @@ func (b *BaseLanguageSandbox) executeSandboxedCmd (cmd []string, random_id int) 
 			AttachStdout: true,
 			AttachStderr: true,
 			TTY: false,
-			User: fmt.Sprintf("%[1]d:%[1]d", random_id),
+			User: fmt.Sprintf("%[1]d:%[1]d", uid),
 			WorkingDir: "/sandbox",
 		},
 	)

@@ -17,10 +17,7 @@ func TestPySuccessfullRun (t *testing.T) {
 
 	sandbox := NewPySandbox(docker, utils.NewUIDPicker())
 
-	output, err := sandbox.ExecuteCode(`
-		a = 20
-		print(a * 3 + 3)
-	`)
+	output, err := sandbox.ExecuteCode(`a = 20; print(a * 3 + 3)`)
 
 	if err != nil {
 		t.Fatal(err)
@@ -40,9 +37,7 @@ func TestPyUnsuccesfullRun (t *testing.T) {
 
 	sandbox := NewPySandbox(docker, utils.NewUIDPicker())
 
-	output, err := sandbox.ExecuteCode(`
-		print(a * 3 + 3)
-	`)
+	output, err := sandbox.ExecuteCode(`print(a * 3 + 3)`)
 
 	if err != nil {
 		t.Fatal(err)
