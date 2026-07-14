@@ -8,3 +8,4 @@ class Language(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, nullable=False)
     name: Mapped[str] = mapped_column(String(64), nullable=False)
+    ext: Mapped[str] = mapped_column(String(16), nullable=False, unique=True)

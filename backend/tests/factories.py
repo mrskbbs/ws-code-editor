@@ -49,10 +49,18 @@ async def create_user(
     return user
 
 
-async def create_language(db: AsyncSession, *, name: str | None = None) -> Language:
+async def create_language(
+    db: AsyncSession,
+    *,
+    name: str | None = None,
+    ext: str | None = None,
+) -> Language:
     """Create and persist a language (rooms require a valid ``language_id``)."""
     n = _next("language")
-    language = Language(name=name or f"lang{n}")
+    language = Language(
+        name=name or f"lang{n}",
+        ext=ext or f"lang{n}",
+    )
     db.add(language)
     await db.commit()
     await db.refresh(language)

@@ -44,7 +44,6 @@ services:
 
   dockerproxy:
     build: ./dockerproxy/
-    port: 1337
     volumes:
       - type: bind
         source: /var/run/docker.sock
@@ -63,7 +62,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+
   test_backend:
+    build:
+      context: ./backend/
+      dockerfile: tests.Dockerfile
     profiles: [test]
     depends_on:
       - test_db
@@ -79,6 +82,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
   backend:
+    build:
+        context: ./backend/
+        dockerfile: Dockerfile
     profile: [prod]
   frontend:
     profile: [prod]

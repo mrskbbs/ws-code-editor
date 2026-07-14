@@ -121,6 +121,7 @@ class TestCreateRoom:
         assert body["owner"]["username"] == user.username
         assert body["language"]["id"] == language.id
         assert body["language"]["name"] == language.name
+        assert body["language"]["ext"] == language.ext
         assert isinstance(body["members"], list)
 
     async def test_creator_can_access_created_room(self, client, db):
@@ -277,6 +278,7 @@ class TestEditRoom:
         body = res.json()
         assert body["owner"]["id"] == user.id
         assert body["language"]["id"] == language.id
+        assert body["language"]["ext"] == language.ext
         assert isinstance(body["members"], list)
 
 

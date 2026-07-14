@@ -2,7 +2,7 @@ package sandboxes
 
 type ExecutionOutput struct {
 	Stdout string `json:"stdout"`
-	Stderr string `json:"stdin"`
+	Stderr string `json:"stderr"`
 }
 
 

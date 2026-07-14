@@ -35,4 +35,4 @@ async def editRoom(data: RoomEdit, room: RoomDep, service: ServiceDep):
 async def deleteRoom(room: RoomDep, service: ServiceDep):
     return await service.deleteRoom(room)
 
-rooms_router.add_api_websocket_route("/{room_id}/ws", wsRoomEndpoint)
+rooms_router.add_api_websocket_route("/{room_id}/ws", wsRoomEndpoint, dependencies=[Depends(getUser), Depends(isRoomMember)])

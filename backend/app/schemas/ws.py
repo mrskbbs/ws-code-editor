@@ -9,5 +9,13 @@ class WSRoomConnection(BaseModel):
     ws: WebSocket
 
 class WSRoomAction(BaseModel):
-    action: Literal["stdin", "code", "stdout", "connect", "disconnect"]
-    data: Any
+    action: Literal["run_code", "update_code", "output", "connect", "disconnect"]
+    payload: Any
+
+class WSRoomCodeActions(BaseModel):
+    action: Literal["insert", "delete"]
+    payload: Any
+
+class WSRoomCodeInsert(BaseModel):
+    position: int
+    code: str

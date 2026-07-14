@@ -20,6 +20,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(rooms_router)
+app.include_router(languages_router)
 
 if __name__ == "__main__":
     uvicorn.run(app, port=8000, host="localhost")

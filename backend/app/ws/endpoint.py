@@ -1,9 +1,10 @@
 from fastapi import WebSocketDisconnect, WebSocket
-from app.dependencies.users import WSUserDep
+from app.db.base import DbDep
 from app.dependencies.rooms import RoomDep
+from app.dependencies.users import UserDep
 from app.schemas.ws import WSRoomConnection
 
-async def wsRoomEndpoint(ws: WebSocket, room: RoomDep, user: WSUserDep):
+async def wsRoomEndpoint(ws: WebSocket, room: RoomDep, user: UserDep):
     await ws.accept()
     conn = WSRoomConnection(user=user, ws=ws)
     await ws.app.state.room_manager.connect(room, conn)

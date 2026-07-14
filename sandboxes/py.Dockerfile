@@ -8,4 +8,3 @@ RUN chown root:root /sandbox
 RUN chmod 0755 /sandbox
 
 WORKDIR /sandbox
-USER sandbox
